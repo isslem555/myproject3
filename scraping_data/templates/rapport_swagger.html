@@ -34,7 +34,14 @@
 <div class="container">
     <h1 class="text-center">Rapport des Endpoints Swagger</h1>
 
-    <!-- ✅ Formulaire dynamique pour URL Swagger -->
+    <!-- Bouton vers statistiques Swagger -->
+    <a href="{% url 'swagger-statistiques' %}">
+        <button style="background-color:#007bff;color:white;padding:10px 20px;border:none;border-radius:5px;">
+            📈 Voir les statistiques Swagger
+        </button>
+    </a>
+
+    <!-- Formulaire dynamique pour URL Swagger -->
     <form id="scraping-form" class="text-center mb-4">
         <input type="text" id="swagger-url" placeholder="Entrez une URL Swagger (ex: https://example.com/swagger.json)" class="form-control mb-2" style="max-width: 600px; margin: auto;">
         <button type="submit" class="btn btn-primary">🔄 Lancer le scraping Swagger</button>
@@ -42,6 +49,7 @@
         <div id="scraping-status" class="mt-2 text-center fw-bold"></div>
     </form>
 
+    <!-- Liste des endpoints Swagger -->
     {% if swagger_data %}
         {% for item in swagger_data %}
             <div class="card endpoint-card">
@@ -85,7 +93,10 @@
     {% endif %}
 </div>
 
-<!-- ✅ JS pour soumettre le formulaire -->
+<!-- Script Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Script formulaire JS -->
 <script>
 document.getElementById('scraping-form').addEventListener('submit', function(e) {
     e.preventDefault();

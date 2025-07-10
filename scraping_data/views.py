@@ -1,36 +1,164 @@
 import os
 import json
+from collections import Counter
+import requests
 
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
-from django.template.context_processors import csrf
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_POST
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, serializers
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 
-from .scraper import (
-    get_products,
-    save_products,
-    fetch_products,
-    extract_full_swagger_data,
-    scrape_swagger
-)
-
-from .serializers import ProductSerializer
+# --- Serializer produit ---
+class ProductSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    title = serializers.CharField()
+    price = serializers.FloatField()
+    category = serializers.CharField()
 
 
-# ✅ VUE HTML DYNAMIQUE — Affiche et scrappe dynamiquement le rapport Swagger
+# --- Base produits en mémoire ---
+PRODUCTS = [
+    {"id": 1, "title": "Produit A", "price": 10.0, "category": "cat1"},
+    {"id": 2, "title": "Produit B", "price": 15.5, "category": "cat2"},
+]
+
+def get_products():
+    return PRODUCTS
+
+def save_products(data):
+    global PRODUCTS
+    PRODUCTS = data
+
+
+# --- Liste produits ---
+class ProductListView(APIView):
+    def get(self, request):
+        data = get_products()
+        q = request.query_params
+
+        if 'min_price' in q:
+            data = [p for p in data if p['price'] >= float(q['min_price'])]
+        if 'max_price' in q:
+            data = [p for p in data if p['price'] <= float(q['max_price'])]
+        if 'category' in q:
+            data = [p for p in data if p['category'].lower() == q['category'].lower()]
+        if 'name' in q:
+            data = [p for p in data if q['name'].lower() in p['title'].lower()]
+
+        return Response(data)
+
+    def post(self, request):
+        serializer = ProductSerializer(data=request.data)
+        if serializer.is_valid():
+            data = get_products()
+            new_product = serializer.validated_data
+            new_product['id'] = max([p['id'] for p in data], default=0) + 1
+            data.append(new_product)
+            save_products(data)
+            return Response(new_product, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=400)
+
+
+# --- Détail produit ---
+class ProductDetailView(APIView):
+    def put(self, request, pk):
+        data = get_products()
+        product = next((p for p in data if p['id'] == pk), None)
+        if not product:
+            return Response({"detail": "Produit non trouvé"}, status=404)
+
+        serializer = ProductSerializer(data=request.data)
+        if serializer.is_valid():
+            updated_product = serializer.validated_data
+            updated_product['id'] = pk
+            data[data.index(product)] = updated_product
+            save_products(data)
+            return Response(updated_product)
+
+        return Response(serializer.errors, status=400)
+
+    def delete(self, request, pk):
+        data = get_products()
+        product = next((p for p in data if p['id'] == pk), None)
+        if not product:
+            return Response({"detail": "Produit non trouvé"}, status=404)
+
+        data.remove(product)
+        save_products(data)
+        return Response(status=204)
+
+
+# --- Fetch externe produit (exemple) ---
+class ProductFetchAPIView(APIView):
+    def post(self, request):
+        data = [{"id": 3, "title": "Produit C", "price": 20, "category": "cat3"}]
+        return Response({"status": "succès", "produits": data})
+
+
+# --- Rapport PDF simple ---
+class ReportPDFView(APIView):
+    def get(self, request):
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="rapport.pdf"'
+        p = canvas.Canvas(response, pagesize=A4)
+        p.drawString(100, 800, "Rapport PDF exemple")
+        p.showPage()
+        p.save()
+        return response
+
+
+# --- Scraping Swagger minimal ---
+class SwaggerScrapeAPIView(APIView):
+    def get(self, request):
+        data = [
+            {"method": "GET", "endpoint": "/api/products/", "summary": "Liste des produits", "parameters": []},
+            {"method": "POST", "endpoint": "/api/products/", "summary": "Créer un produit", "parameters": []},
+        ]
+        return Response(data)
+
+
+# --- Fonction scrape swagger ---
+def scrape_swagger(url):
+    response = requests.get(url)
+    response.raise_for_status()
+    swagger_json = response.json()
+
+    endpoints = []
+    paths = swagger_json.get("paths", {})
+    for path, methods in paths.items():
+        for method, details in methods.items():
+            endpoint = {
+                "method": method.upper(),
+                "endpoint": path,
+                "summary": details.get("summary", ""),
+                "parameters": []
+            }
+            for param in details.get("parameters", []):
+                endpoint["parameters"].append({
+                    "name": param.get("name", ""),
+                    "in": param.get("in", ""),
+                    "type": param.get("schema", {}).get("type", "") if param.get("schema") else param.get("type", ""),
+                    "required": param.get("required", False)
+                })
+            endpoints.append(endpoint)
+
+    file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'swagger_report.json'))
+    with open(file_path, 'w', encoding='utf-8') as f:
+        json.dump(endpoints, f, ensure_ascii=False, indent=2)
+
+    return endpoints
+
+
+# --- Vue HTML rapport swagger + scraping dynamique ---
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def afficher_rapport_swagger(request):
@@ -40,66 +168,46 @@ def afficher_rapport_swagger(request):
         try:
             body = json.loads(request.body)
             url = body.get("swagger_url")
-
             if not url:
-                return JsonResponse({"status": "erreur", "message": "URL Swagger manquante"})
+                return JsonResponse({"status": "erreur", "message": "URL Swagger manquante"}, status=400)
 
-            scrape_swagger(url=url)
+            swagger_data = scrape_swagger(url=url)
+            return JsonResponse({"status": "succès", "message": "Scraping terminé.", "data": swagger_data})
 
-            return JsonResponse({"status": "succès", "message": "Scraping terminé avec succès."})
         except Exception as e:
             return JsonResponse({"status": "erreur", "message": str(e)}, status=500)
 
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+            swagger_data = json.load(f)
     except FileNotFoundError:
-        data = []
+        swagger_data = []
 
-    context = {'swagger_data': data}
+    method_counter = Counter(ep.get("method", "UNKNOWN").upper() for ep in swagger_data)
+    total_params = sum(len(ep.get("parameters", [])) for ep in swagger_data)
+    secured = sum(1 for ep in swagger_data if any("auth" in p.get("name", "").lower() for p in ep.get("parameters", [])))
+    unsecured = len(swagger_data) - secured
+
+    stats = {
+        "methods": list(method_counter.items()),
+        "methods_keys": list(method_counter.keys()),
+        "methods_values": list(method_counter.values()),
+        "avg_params": round(total_params / len(swagger_data), 2) if swagger_data else 0,
+        "secured": secured,
+        "unsecured": unsecured
+    }
+
+    from django.template.context_processors import csrf
+    context = {
+        "swagger_data": swagger_data,
+        "stats": stats,
+    }
     context.update(csrf(request))
+
     return render(request, 'rapport_swagger.html', context)
 
 
-# Vue pour lancer le scraping Swagger avec URL + email (via curl ou API externe)
-@csrf_exempt
-@require_POST
-def lancer_scraping(request):
-    try:
-        body = json.loads(request.body)
-        url = body.get("url", "http://127.0.0.1:8000/swagger.json")
-        email = body.get("email", None)
-
-        scrape_swagger(url=url, user_email=email)
-
-        return JsonResponse({"status": "succès", "message": "Scraping terminé avec succès."})
-    except Exception as e:
-        return JsonResponse({"status": "erreur", "message": str(e)}, status=500)
-
-
-# Vue API dédiée — Scraping Swagger avec "swagger_url" et "email" (POST JSON)
-@csrf_exempt
-@require_POST
-def lancer_scraping_url(request):
-    try:
-        body = json.loads(request.body)
-        url = body.get("swagger_url")
-        email = body.get("email", None)
-
-        if not url:
-            return JsonResponse({"status": "erreur", "message": "URL Swagger manquante"}, status=400)
-
-        scrape_swagger(url=url, user_email=email)
-
-        return JsonResponse({"status": "succès", "message": "Scraping terminé avec succès."})
-    except Exception as e:
-        msg = str(e)
-        if "Code 401" in msg:
-            msg += " — Veuillez vérifier votre token Bearer (email)."
-        return JsonResponse({"status": "erreur", "message": msg}, status=500)
-
-
-# Rapport PDF – Généré depuis swagger_report.json
+# --- Rapport swagger PDF ---
 def rapport_swagger_pdf(request):
     file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'swagger_report.json'))
 
@@ -110,7 +218,7 @@ def rapport_swagger_pdf(request):
         return HttpResponse("Fichier swagger_report.json introuvable", status=404)
 
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename=\"rapport_swagger.pdf\"'
+    response['Content-Disposition'] = 'attachment; filename="rapport_swagger.pdf"'
 
     p = canvas.Canvas(response, pagesize=A4)
     width, height = A4
@@ -150,104 +258,64 @@ def rapport_swagger_pdf(request):
     return response
 
 
-# CRUD Produits
+# --- Vues pour lancer scraping via POST (facultatif) ---
+@csrf_exempt
+@require_POST
+def lancer_scraping(request):
+    try:
+        body = json.loads(request.body)
+        url = body.get("url")
+        if not url:
+            return JsonResponse({"status": "erreur", "message": "URL manquante"}, status=400)
 
-class ProductListView(APIView):
-    @swagger_auto_schema(
-        operation_summary="Lister les produits",
-        operation_description="Retourne tous les produits avec filtres optionnels.",
-        manual_parameters=[
-            openapi.Parameter('min_price', openapi.IN_QUERY, type=openapi.TYPE_NUMBER),
-            openapi.Parameter('max_price', openapi.IN_QUERY, type=openapi.TYPE_NUMBER),
-            openapi.Parameter('category', openapi.IN_QUERY, type=openapi.TYPE_STRING),
-            openapi.Parameter('name', openapi.IN_QUERY, type=openapi.TYPE_STRING),
-        ]
-    )
-    def get(self, request):
-        data = get_products()
-        q = request.query_params
+        scrape_swagger(url=url)
 
-        if 'min_price' in q:
-            data = [p for p in data if p['price'] >= float(q['min_price'])]
-        if 'max_price' in q:
-            data = [p for p in data if p['price'] <= float(q['max_price'])]
-        if 'category' in q:
-            data = [p for p in data if p['category'].lower() == q['category'].lower()]
-        if 'name' in q:
-            data = [p for p in data if q['name'].lower() in p['title'].lower()]
-
-        return Response(data)
-
-    @swagger_auto_schema(operation_summary="Créer un produit", request_body=ProductSerializer)
-    def post(self, request):
-        data = get_products()
-        serializer = ProductSerializer(data=request.data)
-
-        if serializer.is_valid():
-            new_product = serializer.data
-            new_product['id'] = max([p['id'] for p in data], default=0) + 1
-            data.append(new_product)
-            save_products(data)
-            return Response(new_product, status=status.HTTP_201_CREATED)
-
-        return Response(serializer.errors, status=400)
+        return JsonResponse({"status": "succès", "message": "Scraping lancé avec succès."})
+    except Exception as e:
+        return JsonResponse({"status": "erreur", "message": str(e)}, status=500)
 
 
-class ProductDetailView(APIView):
-    @swagger_auto_schema(operation_summary="Modifier un produit", request_body=ProductSerializer)
-    def put(self, request, pk):
-        data = get_products()
-        product = next((p for p in data if p['id'] == pk), None)
+@csrf_exempt
+@require_POST
+def lancer_scraping_url(request):
+    try:
+        body = json.loads(request.body)
+        url = body.get("swagger_url")
+        if not url:
+            return JsonResponse({"status": "erreur", "message": "URL Swagger manquante"}, status=400)
 
-        if not product:
-            return Response({"detail": "Produit non trouvé"}, status=status.HTTP_404_NOT_FOUND)
+        scrape_swagger(url=url)
 
-        serializer = ProductSerializer(data=request.data)
-        if serializer.is_valid():
-            updated_product = serializer.data
-            updated_product['id'] = pk
-            data[data.index(product)] = updated_product
-            save_products(data)
-            return Response(updated_product)
-
-        return Response(serializer.errors, status=400)
-
-    @swagger_auto_schema(operation_summary="Supprimer un produit")
-    def delete(self, request, pk):
-        data = get_products()
-        product = next((p for p in data if p['id'] == pk), None)
-
-        if not product:
-            return Response({"detail": "Produit non trouvé"}, status=status.HTTP_404_NOT_FOUND)
-
-        data.remove(product)
-        save_products(data)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return JsonResponse({"status": "succès", "message": "Scraping Swagger via URL réussi."})
+    except Exception as e:
+        return JsonResponse({"status": "erreur", "message": str(e)}, status=500)
 
 
-class ProductFetchAPIView(APIView):
-    @swagger_auto_schema(operation_summary="Récupérer les produits depuis API externe")
-    def post(self, request):
-        data = fetch_products()
-        if "erreur" in data:
-            return Response(data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response({"status": "succès", "produits": data}, status=status.HTTP_200_OK)
+# --- Nouvelle vue : Statistiques Swagger ---
+def statistiques_swagger(request):
+    file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'swagger_report.json'))
 
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            swagger_data = json.load(f)
+    except FileNotFoundError:
+        swagger_data = []
 
-class ReportPDFView(APIView):
-    @swagger_auto_schema(operation_summary="Télécharger un rapport PDF de test")
-    def get(self, request):
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="rapport.pdf"'
-        p = canvas.Canvas(response)
-        p.drawString(100, 800, "Rapport automatique généré")
-        p.showPage()
-        p.save()
-        return response
+    method_counter = Counter(ep.get("method", "UNKNOWN").upper() for ep in swagger_data)
+    total_params = sum(len(ep.get("parameters", [])) for ep in swagger_data)
+    secured = sum(1 for ep in swagger_data if any("auth" in p.get("name", "").lower() for p in ep.get("parameters", [])))
+    unsecured = len(swagger_data) - secured
 
+    stats = {
+        "methods": list(method_counter.items()),
+        "methods_keys": list(method_counter.keys()),
+        "methods_values": list(method_counter.values()),
+        "avg_params": round(total_params / len(swagger_data), 2) if swagger_data else 0,
+        "secured": secured,
+        "unsecured": unsecured
+    }
 
-class SwaggerScrapeAPIView(APIView):
-    @swagger_auto_schema(operation_summary="Lister les endpoints Swagger")
-    def get(self, request):
-        data = extract_full_swagger_data()
-        return Response(data)
+    context = {
+        "stats": stats
+    }
+    return render(request, 'swagger_statistiques.html', context)

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Statistiques Swagger</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 2rem;
+            background-color: #f6f9fc;
+        }
+        h1 {
+            color: #003366;
+        }
+        .chart-container {
+            width: 600px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>📊 Statistiques Swagger</h1>
+
+    <div class="chart-container">
+        <canvas id="methodChart"></canvas>
+    </div>
+
+    <p><strong>Nombre moyen de paramètres par endpoint :</strong> {{ stats.avg_params }}</p>
+    <p><strong>Endpoints sécurisés :</strong> {{ stats.secured }}</p>
+    <p><strong>Endpoints non sécurisés :</strong> {{ stats.unsecured }}</p>
+
+    <script>
+        const ctx = document.getElementById('methodChart');
+        const chart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: {{ stats.methods_keys|safe }},
+                datasets: [{
+                    label: 'Méthodes HTTP utilisées',
+                    data: {{ stats.methods_values|safe }},
+                    backgroundColor: ['#36a2eb', '#ff6384', '#ffce56', '#4bc0c0', '#9966ff']
+                }]
+            }
+        });
+    </script>
+</body>
+</html>

@@ -8,7 +8,8 @@ from .views import (
     afficher_rapport_swagger,     # ✅ Vue HTML dynamique avec formulaire
     rapport_swagger_pdf,          # ✅ Rapport PDF
     lancer_scraping,              # ✅ Scraping API local
-    lancer_scraping_url           # ✅ Scraping Swagger depuis URL (AJAX/POST)
+    lancer_scraping_url,         # ✅ Scraping Swagger depuis URL (AJAX/POST)
+    statistiques_swagger         # ✅ 🆕 Vue statistiques Swagger
 )
 
 urlpatterns = [
@@ -34,4 +35,7 @@ urlpatterns = [
 
     # 🔁 Scraping Swagger externe via URL JSON (utilisé par JS dans formulaire)
     path('lancer-scraping-url/', lancer_scraping_url, name='lancer-scraping-url'),
+
+    # 📈 🆕 Page dédiée aux statistiques Swagger
+    path('rapport-swagger/statistiques/', statistiques_swagger, name='swagger-statistiques'),
 ]
