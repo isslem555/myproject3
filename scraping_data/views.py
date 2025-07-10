@@ -31,8 +31,10 @@ PRODUCTS = [
     {"id": 2, "title": "Produit B", "price": 15.5, "category": "cat2"},
 ]
 
+
 def get_products():
     return PRODUCTS
+
 
 def save_products(data):
     global PRODUCTS
@@ -116,17 +118,7 @@ class ReportPDFView(APIView):
         return response
 
 
-# --- Scraping Swagger minimal ---
-class SwaggerScrapeAPIView(APIView):
-    def get(self, request):
-        data = [
-            {"method": "GET", "endpoint": "/api/products/", "summary": "Liste des produits", "parameters": []},
-            {"method": "POST", "endpoint": "/api/products/", "summary": "Créer un produit", "parameters": []},
-        ]
-        return Response(data)
-
-
-# --- Fonction scrape swagger ---
+# --- Fonction scrape swagger corrigée ---
 def scrape_swagger(url):
     response = requests.get(url)
     response.raise_for_status()
@@ -136,21 +128,52 @@ def scrape_swagger(url):
     paths = swagger_json.get("paths", {})
     for path, methods in paths.items():
         for method, details in methods.items():
+            summary = details.get("summary", "") or details.get("description", "")
+            if "IGNORE THIS ENDPOINT FOR NOW" in summary:
+                continue  # Ignore cet endpoint
+
             endpoint = {
                 "method": method.upper(),
                 "endpoint": path,
-                "summary": details.get("summary", ""),
+                "summary": summary,
                 "parameters": []
             }
+
+            # Paramètres classiques (query, header, path, cookie)
             for param in details.get("parameters", []):
+                param_type = ""
+                if "schema" in param and param["schema"]:
+                    param_type = param["schema"].get("type", "")
+                else:
+                    param_type = param.get("type", "")
+
                 endpoint["parameters"].append({
                     "name": param.get("name", ""),
                     "in": param.get("in", ""),
-                    "type": param.get("schema", {}).get("type", "") if param.get("schema") else param.get("type", ""),
-                    "required": param.get("required", False)
+                    "type": param_type,
+                    "required": param.get("required", False),
+                    "example": param.get("example", "valeur")
                 })
+
+            # Paramètres dans requestBody (exemple JSON)
+            if "requestBody" in details:
+                content = details["requestBody"].get("content", {})
+                if "application/json" in content:
+                    schema = content["application/json"].get("schema", {})
+                    props = schema.get("properties", {})
+                    required_props = schema.get("required", [])
+                    for name, prop in props.items():
+                        endpoint["parameters"].append({
+                            "name": name,
+                            "in": "body",
+                            "type": prop.get("type", ""),
+                            "required": name in required_props,
+                            "example": prop.get("example", "valeur")
+                        })
+
             endpoints.append(endpoint)
 
+    # Sauvegarde brute dans swagger_report.json au niveau du dossier parent
     file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'swagger_report.json'))
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(endpoints, f, ensure_ascii=False, indent=2)
@@ -172,16 +195,104 @@ def afficher_rapport_swagger(request):
                 return JsonResponse({"status": "erreur", "message": "URL Swagger manquante"}, status=400)
 
             swagger_data = scrape_swagger(url=url)
+            base_url = url.rstrip("/")
+
+            # Enrichir chaque endpoint avec url complète et commande cURL
+            for ep in swagger_data:
+                method = ep.get("method", "GET").upper()
+                endpoint_path = ep.get("endpoint", "")
+
+                # Construction query string pour les params in=query
+                query_params = []
+                for param in ep.get("parameters", []):
+                    if param.get("in") == "query":
+                        name = param.get("name")
+                        example = param.get("example", "valeur")
+                        query_params.append(f"{name}={example}")
+
+                query_string = "&".join(query_params)
+                full_url = f"{base_url}{endpoint_path}"
+                if query_string:
+                    full_url += f"?{query_string}"
+
+                # Commande cURL
+                curl_command = f"curl -X '{method}' \\\n  '{full_url}'"
+                headers = [
+                    ("accept", "application/json"),
+                    ("X-CSRFTOKEN", "dummycsrftoken")
+                ]
+                for hname, hval in headers:
+                    curl_command += f" \\\n  -H '{hname}: {hval}'"
+
+                # Body fictif pour POST ou PUT
+                body_params = {
+                    p["name"]: "example_value"
+                    for p in ep.get("parameters", [])
+                    if p.get("in") == "body"
+                }
+                if method in ["POST", "PUT"] and body_params:
+                    body_json = json.dumps(body_params, indent=2)
+                    curl_command += f" \\\n  -d '{body_json}'"
+
+                ep["url_complete"] = full_url
+                ep["curl_command"] = curl_command
+
+            # Sauvegarde enrichie dans le même fichier
+            with open(file_path, 'w', encoding='utf-8') as f:
+                json.dump(swagger_data, f, ensure_ascii=False, indent=2)
+
+            request.session['swagger_base_url'] = base_url
+
             return JsonResponse({"status": "succès", "message": "Scraping terminé.", "data": swagger_data})
 
         except Exception as e:
             return JsonResponse({"status": "erreur", "message": str(e)}, status=500)
 
+    # GET → affichage
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             swagger_data = json.load(f)
     except FileNotFoundError:
         swagger_data = []
+
+    base_url = request.session.get('swagger_base_url', '')
+
+    # Réenrichir les données (utile après reload)
+    for ep in swagger_data:
+        method = ep.get("method", "GET").upper()
+        endpoint_path = ep.get("endpoint", "")
+
+        query_params = []
+        for param in ep.get("parameters", []):
+            if param.get("in") == "query":
+                name = param.get("name")
+                example = param.get("example", "valeur")
+                query_params.append(f"{name}={example}")
+
+        query_string = "&".join(query_params)
+        full_url = f"{base_url.rstrip('/')}{endpoint_path}"
+        if query_string:
+            full_url += f"?{query_string}"
+
+        curl_command = f"curl -X '{method}' \\\n  '{full_url}'"
+        headers = [
+            ("accept", "application/json"),
+            ("X-CSRFTOKEN", "dummycsrftoken")
+        ]
+        for hname, hval in headers:
+            curl_command += f" \\\n  -H '{hname}: {hval}'"
+
+        body_params = {
+            p["name"]: "example_value"
+            for p in ep.get("parameters", [])
+            if p.get("in") == "body"
+        }
+        if method in ["POST", "PUT"] and body_params:
+            body_json = json.dumps(body_params, indent=2)
+            curl_command += f" \\\n  -d '{body_json}'"
+
+        ep["url_complete"] = full_url
+        ep["curl_command"] = curl_command
 
     method_counter = Counter(ep.get("method", "UNKNOWN").upper() for ep in swagger_data)
     total_params = sum(len(ep.get("parameters", [])) for ep in swagger_data)
@@ -258,7 +369,7 @@ def rapport_swagger_pdf(request):
     return response
 
 
-# --- Vues pour lancer scraping via POST (facultatif) ---
+# --- Vues de scraping direct ---
 @csrf_exempt
 @require_POST
 def lancer_scraping(request):
@@ -291,7 +402,7 @@ def lancer_scraping_url(request):
         return JsonResponse({"status": "erreur", "message": str(e)}, status=500)
 
 
-# --- Nouvelle vue : Statistiques Swagger ---
+# --- Statistiques Swagger ---
 def statistiques_swagger(request):
     file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'swagger_report.json'))
 
@@ -319,3 +430,16 @@ def statistiques_swagger(request):
         "stats": stats
     }
     return render(request, 'swagger_statistiques.html', context)
+
+
+# --- Classe API pour scraping Swagger ---
+class SwaggerScrapeAPIView(APIView):
+    def post(self, request):
+        url = request.data.get('swagger_url')
+        if not url:
+            return Response({"status": "erreur", "message": "URL Swagger manquante"}, status=400)
+        try:
+            data = scrape_swagger(url)
+            return Response({"status": "succès", "data": data})
+        except Exception as e:
+            return Response({"status": "erreur", "message": str(e)}, status=500)
