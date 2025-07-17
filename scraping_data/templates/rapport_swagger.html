@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rapport Swagger dynamique</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
     .method-badge {
@@ -30,10 +31,118 @@
       word-wrap: break-word;
       font-size: 0.9rem;
     }
+
+    /* ===== Navbar moderne & attirante ===== */
+    .navbar-gradient {
+      background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+      box-shadow: 0 4px 12px rgba(24, 40, 72, 0.3);
+      padding: 0.8rem 1.5rem;
+    }
+    .navbar-brand svg path {
+      fill: white;
+    }
+    .navbar-brand {
+      font-size: 1.5rem;
+      color: white !important;
+    }
+    /* Conteneur pour aligner MyProject + Projects */
+    .brand-container {
+      display: flex;
+      align-items: center;
+    }
+    .brand-container a.navbar-brand {
+      margin-right: 1rem;
+      display: flex;
+      align-items: center;
+    }
+    .brand-container .nav-link-projects {
+      color: white !important;
+      font-size: 1.05rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.3s ease;
+      padding-left: 0;
+      padding-right: 0;
+    }
+    .brand-container .nav-link-projects:hover {
+      color: #ffd700 !important;
+      text-decoration: underline;
+    }
+
+    .navbar-nav .nav-link {
+      color: white !important;
+      font-size: 1.05rem;
+      transition: color 0.3s ease;
+      font-weight: 600;
+    }
+    .navbar-nav .nav-link:hover {
+      color: #ffd700 !important; /* Jaune or */
+      text-decoration: underline;
+    }
+    .btn-light {
+      font-weight: 600;
+      transition: transform 0.25s ease;
+    }
+    .btn-light:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+    }
+    .custom-toggler {
+      border-color: transparent;
+    }
+    .custom-toggler .navbar-toggler-icon {
+      background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28255, 255, 255, 1%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+    }
+    @media (max-width: 576px) {
+      .navbar-gradient {
+        padding: 0.6rem 1rem;
+      }
+      /* Sur mobile, espace un peu moins large et stacking */
+      .brand-container {
+        flex-wrap: wrap;
+      }
+      .brand-container .nav-link-projects {
+        margin-top: 0.5rem;
+      }
+    }
   </style>
 </head>
 <body class="bg-light">
 
+<!-- NAVBAR MODERNE & ATTIRANTE -->
+<nav class="navbar navbar-expand-lg navbar-gradient shadow-sm">
+  <div class="container">
+
+    <!-- Conteneur pour aligner MyProject + Projects -->
+    <div class="brand-container">
+      <!-- Logo / Nom -->
+      <a class="navbar-brand d-flex align-items-center fw-bold" href="#">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="white" class="me-2" viewBox="0 0 16 16">
+          <path d="M8 0L3 16h10L8 0z"/>
+        </svg>
+        MyProject
+      </a>
+      <!-- Projects à côté -->
+      <a href="{% url 'scraping_data:list-projects' %}" class="nav-link-projects">Projects</a>
+    </div>
+
+    <!-- Burger menu -->
+    <button class="navbar-toggler custom-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Menu à droite -->
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item mx-2">
+          <a class="btn btn-light btn-sm px-4 rounded-pill shadow-sm" href="#">Get Started</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- 🧾 CONTENU DU RAPPORT -->
 <div class="container py-4">
   <h1 class="text-center mb-4 text-primary fw-bold">Rapport Swagger dynamique</h1>
 

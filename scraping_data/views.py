@@ -2,11 +2,15 @@ import os
 import json
 from collections import Counter
 import requests
+import io
+from urllib.parse import urlparse
 
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse, JsonResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
+
+from django import forms
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -14,19 +18,90 @@ from rest_framework import status, serializers
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import cm
 
-from scraping_data.models import SwaggerProject
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-import json
 from .models import SwaggerProject
 
 
-# -------------------------------
-# Serializers exemples produits
-# -------------------------------
+# --------- Formulaire Django pour SwaggerProject ---------
+class SwaggerProjectForm(forms.ModelForm):
+    class Meta:
+        model = SwaggerProject
+        fields = ['name', 'swagger_url']
 
+
+# --------- Vues CRUD Django classiques ---------
+def list_projects(request):
+    projets = SwaggerProject.objects.all().order_by('-created_at')
+
+    # Ajout de swagger_root_url = racine de swagger_url (ex: https://petstore3.swagger.io)
+    for p in projets:
+        parsed_url = urlparse(p.swagger_url)
+        p.swagger_root_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+
+    return render(request, 'list_projects.html', {'projets': projets})
+
+
+def add_project(request):
+    if request.method == "POST":
+        form = SwaggerProjectForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('scraping_data:list-projects')
+    else:
+        form = SwaggerProjectForm()
+    return render(request, 'project_form.html', {'form': form, 'title': 'Ajouter un projet'})
+
+
+def edit_project(request, pk):
+    projet = get_object_or_404(SwaggerProject, pk=pk)
+    if request.method == "POST":
+        form = SwaggerProjectForm(request.POST, instance=projet)
+        if form.is_valid():
+            form.save()
+            return redirect('scraping_data:list-projects')
+    else:
+        form = SwaggerProjectForm(instance=projet)
+    return render(request, 'project_form.html', {'form': form, 'title': 'Modifier le projet'})
+
+
+@require_POST
+def delete_project(request, pk):
+    projet = get_object_or_404(SwaggerProject, pk=pk)
+    projet.delete()
+    return redirect('scraping_data:list-projects')
+
+
+# --------- Nouvelle vue pour afficher UNIQUEMENT les headers ---------
+def project_parameters(request, pk):
+    projet = get_object_or_404(SwaggerProject, pk=pk)
+    swagger_json = projet.swagger_json or []
+
+    # Liste pour stocker les headers uniques
+    headers = []
+    seen_names = set()
+
+    for ep in swagger_json:
+        for param in ep.get("parameters", []):
+            # On ne garde que les paramètres "header"
+            if param.get("in") == "header":
+                name = param.get("name")
+                if name and name not in seen_names:
+                    headers.append({
+                        "name": name,
+                        "type": param.get("type", ""),
+                        "required": param.get("required", False),
+                        "example": param.get("value", ""),
+                    })
+                    seen_names.add(name)
+
+    context = {
+        'projet': projet,
+        'headers': headers,
+    }
+    return render(request, 'project_parameters.html', context)
+
+
+# --------- Serializers exemple produits ---------
 class ProductSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     title = serializers.CharField()
@@ -34,10 +109,7 @@ class ProductSerializer(serializers.Serializer):
     category = serializers.CharField()
 
 
-# -------------------------------
-# Gestion produits fictifs
-# -------------------------------
-
+# --------- Gestion produits fictifs ---------
 PRODUCTS = [
     {"id": 1, "title": "Produit A", "price": 10.0, "category": "cat1"},
     {"id": 2, "title": "Produit B", "price": 15.5, "category": "cat2"},
@@ -51,10 +123,7 @@ def save_products(data):
     PRODUCTS = data
 
 
-# -------------------------------
-# API views produits (CRUD + fetch)
-# -------------------------------
-
+# --------- API views produits (CRUD + fetch) ---------
 class ProductListView(APIView):
     def get(self, request):
         data = get_products()
@@ -116,10 +185,7 @@ class ProductFetchAPIView(APIView):
         return Response({"status": "succès", "produits": data})
 
 
-# -------------------------------
-# Scraping Swagger JSON
-# -------------------------------
-
+# --------- Scraping Swagger JSON ---------
 def scrape_swagger(url):
     response = requests.get(url)
     response.raise_for_status()
@@ -141,7 +207,6 @@ def scrape_swagger(url):
                 "parameters": []
             }
 
-            # Paramètres simples
             for param in details.get("parameters", []):
                 param_type = ""
                 if "schema" in param and param["schema"]:
@@ -149,15 +214,18 @@ def scrape_swagger(url):
                 else:
                     param_type = param.get("type", "")
 
+                param_value = param.get("example")
+                if param_value is None:
+                    param_value = param.get("default", "valeur")
+
                 endpoint["parameters"].append({
                     "name": param.get("name", ""),
                     "in": param.get("in", ""),
                     "type": param_type,
                     "required": param.get("required", False),
-                    "example": param.get("example", "valeur")
+                    "value": param_value
                 })
 
-            # Paramètres dans requestBody (JSON)
             if "requestBody" in details:
                 content = details["requestBody"].get("content", {})
                 if "application/json" in content:
@@ -165,12 +233,17 @@ def scrape_swagger(url):
                     props = schema.get("properties", {})
                     required_props = schema.get("required", [])
                     for name, prop in props.items():
+                        param_type = prop.get("type", "")
+                        example_value = prop.get("example")
+                        if example_value is None:
+                            example_value = prop.get("default", "valeur")
+
                         endpoint["parameters"].append({
                             "name": name,
                             "in": "body",
-                            "type": prop.get("type", ""),
+                            "type": param_type,
                             "required": name in required_props,
-                            "example": prop.get("example", "valeur")
+                            "value": example_value
                         })
 
             endpoints.append(endpoint)
@@ -185,42 +258,20 @@ def enrich_and_save(swagger_data, url):
         method = ep.get("method", "GET").upper()
         endpoint_path = ep.get("endpoint", "")
 
-        # Query params dans l’URL
         query_params = []
         for param in ep.get("parameters", []):
             if param.get("in") == "query":
                 name = param.get("name")
-                example = param.get("example", "valeur")
-                query_params.append(f"{name}={example}")
+                value = param.get("value", "valeur")
+                query_params.append(f"{name}={value}")
 
         query_string = "&".join(query_params)
         full_url = f"{base_url}{endpoint_path}"
         if query_string:
             full_url += f"?{query_string}"
 
-        # Commande cURL construite
-        curl_command = f"curl -X '{method}' \\\n  '{full_url}'"
-        headers = [
-            ("accept", "application/json"),
-            ("X-CSRFTOKEN", "dummycsrftoken")
-        ]
-        for hname, hval in headers:
-            curl_command += f" \\\n  -H '{hname}: {hval}'"
-
-        # Corps JSON si POST/PUT avec params body
-        body_params = {
-            p["name"]: "example_value"
-            for p in ep.get("parameters", [])
-            if p.get("in") == "body"
-        }
-        if method in ["POST", "PUT"] and body_params:
-            body_json = json.dumps(body_params, indent=2)
-            curl_command += f" \\\n  -d '{body_json}'"
-
         ep["url_complete"] = full_url
-        ep["curl_command"] = curl_command
 
-    # Sauvegarde dans un fichier JSON local
     file_path = os.path.abspath(
         os.path.join(os.path.dirname(__file__), '..', 'swagger_report.json')
     )
@@ -230,10 +281,7 @@ def enrich_and_save(swagger_data, url):
     return swagger_data
 
 
-# -------------------------------
-# Vue affichage HTML rapport Swagger
-# -------------------------------
-
+# --------- Vue affichage HTML rapport Swagger ---------
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def afficher_rapport_swagger(request):
@@ -263,7 +311,6 @@ def afficher_rapport_swagger(request):
         except Exception as e:
             return JsonResponse({"status": "erreur", "message": str(e)}, status=500)
 
-    # GET : charger depuis DB ou fichier local
     if project_id:
         projet = get_object_or_404(SwaggerProject, pk=project_id)
         swagger_data = projet.swagger_json or []
@@ -279,26 +326,15 @@ def afficher_rapport_swagger(request):
         except FileNotFoundError:
             swagger_data = []
 
-    # Statistiques simples
     method_counter = Counter(
         ep.get("method", "UNKNOWN").upper() for ep in swagger_data
     )
     total_params = sum(
         len(ep.get("parameters", [])) for ep in swagger_data
     )
-    secured = sum(
-        1 for ep in swagger_data
-        if any("auth" in p.get("name", "").lower() for p in ep.get("parameters", []))
-    )
-    unsecured = len(swagger_data) - secured
-
     stats = {
         "methods": list(method_counter.items()),
-        "methods_keys": list(method_counter.keys()),
-        "methods_values": list(method_counter.values()),
         "avg_params": round(total_params / len(swagger_data), 2) if swagger_data else 0,
-        "secured": secured,
-        "unsecured": unsecured
     }
 
     context = {
@@ -309,71 +345,38 @@ def afficher_rapport_swagger(request):
     return render(request, "rapport_swagger.html", context)
 
 
-# -------------------------------
-# Génération PDF rapport Swagger
-# -------------------------------
-
-def rapport_swagger_pdf(request):
-    file_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), '..', 'swagger_report.json')
-    )
+# --------- Vue POST scraping simple ---------
+@csrf_exempt
+@require_POST
+def lancer_scraping(request):
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        return HttpResponse("Fichier swagger_report.json introuvable", status=404)
+        body = json.loads(request.body)
+        url = body.get("url")
+        if not url:
+            return JsonResponse({"status": "erreur", "message": "URL manquante"}, status=400)
 
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="rapport_swagger.pdf"'
+        swagger_data = scrape_swagger(url)
+        swagger_data = enrich_and_save(swagger_data, url)
 
-    p = canvas.Canvas(response, pagesize=A4)
-    width, height = A4
-    y = height - 2 * cm
-    p.setFont("Helvetica-Bold", 14)
-    p.drawString(2 * cm, y, "Rapport des Endpoints Swagger")
-    y -= 1.2 * cm
+        SwaggerProject.objects.create(
+            name=None,
+            swagger_url=url,
+            swagger_json=swagger_data
+        )
 
-    for endpoint in data:
-        if y < 3 * cm:
-            p.showPage()
-            y = height - 2 * cm
-            p.setFont("Helvetica", 11)
-
-        p.setFont("Helvetica-Bold", 10)
-        p.drawString(2 * cm, y, f"{endpoint['method']} {endpoint['endpoint']}")
-        y -= 0.5 * cm
-
-        p.setFont("Helvetica", 9)
-        p.drawString(2.2 * cm, y, f"{endpoint['summary']}")
-        y -= 0.5 * cm
-
-        for param in endpoint.get("parameters", []):
-            if y < 2 * cm:
-                p.showPage()
-                y = height - 2 * cm
-                p.setFont("Helvetica", 9)
-            text = f" - {param['name']} ({param['in']}, {param['type']}, requis: {param['required']})"
-            p.drawString(2.4 * cm, y, text)
-            y -= 0.4 * cm
-
-        y -= 0.5 * cm
-
-    p.showPage()
-    p.save()
-    return response
+        return JsonResponse({"status": "succès", "message": "Scraping lancé avec succès.", "data": swagger_data})
+    except Exception as e:
+        return JsonResponse({"status": "erreur", "message": str(e)}, status=500)
 
 
-# -------------------------------
-# APIView POST scraping Swagger
-# -------------------------------
-
+# --------- APIView SwaggerScrapeAPIView ---------
 class SwaggerScrapeAPIView(APIView):
     def post(self, request):
-        url = request.data.get('swagger_url')
-        if not url:
-            return Response({"status": "erreur", "message": "URL Swagger manquante"}, status=400)
-
         try:
+            url = request.data.get("url")
+            if not url:
+                return Response({"status": "erreur", "message": "URL Swagger manquante"}, status=400)
+
             swagger_data = scrape_swagger(url)
             swagger_data = enrich_and_save(swagger_data, url)
 
@@ -382,55 +385,127 @@ class SwaggerScrapeAPIView(APIView):
                 swagger_url=url,
                 swagger_json=swagger_data
             )
-            return Response({"status": "succès", "data": swagger_data})
 
+            return Response({
+                "status": "succès",
+                "message": "Scraping terminé via SwaggerScrapeAPIView",
+                "data": swagger_data
+            })
         except Exception as e:
             return Response({"status": "erreur", "message": str(e)}, status=500)
 
 
-# -------------------------------
-# Liste projets Swagger enregistrés
-# -------------------------------
+# --------- Génération simple PDF rapport Swagger ---------
+def rapport_swagger_pdf(request):
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=A4)
 
-def list_projects(request):
-    projets = SwaggerProject.objects.all().order_by('-created_at')
-    return render(request, 'list_projects.html', {'projets': projets})
+    p.drawString(100, 800, "Rapport Swagger PDF")
+    p.drawString(100, 780, "Ceci est un exemple de génération de PDF.")
+
+    p.showPage()
+    p.save()
+
+    buffer.seek(0)
+    return FileResponse(buffer, as_attachment=True, filename='rapport_swagger.pdf')
 
 
-# -------------------------------
-# Vue POST scraping simple (pour compatibilité)
-# -------------------------------
+# ======================= VUES TEST API ========================
+from django.utils import timezone
+
+# variable globale pour l'historique
+test_history = []
+
+def tester_page(request):
+    # affiche la page avec le formulaire
+    return render(request, "tester.html")
+
 @csrf_exempt
-def lancer_scraping(request):
-    if request.method == "POST":
-        try:
-            body = json.loads(request.body.decode("utf-8"))
+@require_POST
+def test_endpoint(request):
+    data = json.loads(request.body.decode('utf-8'))
+    method = data.get('method', 'GET')
+    url = data.get('url', '')
+    params = data.get('params', {})
+    path_vars = data.get('path_vars', {})
+    body = data.get('body', {})
+    headers = data.get('headers', {})
 
-            # Ici on récupère la bonne clé, envoyée par ton JS :
-            url = body.get("url")     # C'est bien "url" dans ton JS
-            if not url:
-                return JsonResponse({"status": "erreur", "message": "URL manquante"}, status=400)
+    # Validation NASA
+    if 'api.nasa.gov' in url and 'api_key' not in params:
+        return JsonResponse({
+            'status': 'error',
+            'error': 'Clé API NASA (api_key) requise pour cet endpoint'
+        }, status=400)
 
-            # Lancer le scraping
-            swagger_data = scrape_swagger(url)
-            swagger_data = enrich_and_save(swagger_data, url)
+    # Remplacement path vars
+    formatted_url = url
+    for key, value in path_vars.items():
+        formatted_url = formatted_url.replace(f'{{{key}}}', value)
 
-            # Sauvegarder dans la base de données
-            SwaggerProject.objects.create(
-                name=None,
-                swagger_url=url,
-                swagger_json=swagger_data
-            )
+    try:
+        resp = requests.request(
+            method,
+            formatted_url,
+            params=params,
+            json=body if body else None,
+            headers=headers,
+            timeout=5
+        )
 
-            return JsonResponse({
-                "status": "succès",
-                "message": "Scraping lancé avec succès.",
-                "data": swagger_data
-            })
+        # statut
+        if 200 <= resp.status_code <= 299:
+            test_status = "succeeded" if resp.status_code == 201 else "passed"
+        else:
+            test_status = "failed"
 
-        except json.JSONDecodeError:
-            return JsonResponse({"status": "erreur", "message": "JSON invalide"}, status=400)
-        except Exception as e:
-            return JsonResponse({"status": "erreur", "message": str(e)}, status=500)
+        entry = {
+            'timestamp': timezone.now().isoformat(),
+            'method': method,
+            'url': formatted_url,
+            'params': params,
+            'path_vars': path_vars,
+            'body': body,
+            'headers': headers,
+            'status_code': resp.status_code,
+            'response': resp.text,
+            'test_status': test_status,
+        }
+        test_history.append(entry)
 
-    return JsonResponse({"status": "erreur", "message": "Méthode non autorisée"}, status=405)
+        return JsonResponse({
+            'status': 'success',
+            'status_code': resp.status_code,
+            'response': resp.text,
+            'request_body': body
+        })
+
+    except requests.RequestException as e:
+        entry = {
+            'timestamp': timezone.now().isoformat(),
+            'method': method,
+            'url': formatted_url,
+            'params': params,
+            'path_vars': path_vars,
+            'body': body,
+            'headers': headers,
+            'status_code': 500,
+            'response': str(e),
+            'test_status': 'failed'
+        }
+        test_history.append(entry)
+        return JsonResponse({'status': 'error', 'error': str(e)}, status=500)
+
+def download_history(request):
+    # construire le fichier JSON
+    buffer = io.StringIO()
+    json.dump(test_history, buffer, indent=2)
+    buffer.seek(0)
+
+    mem = io.BytesIO()
+    mem.write(buffer.getvalue().encode('utf-8'))
+    mem.seek(0)
+
+    response = HttpResponse(mem, content_type='application/json')
+    response['Content-Disposition'] = 'attachment; filename=test_history.json'
+    return response

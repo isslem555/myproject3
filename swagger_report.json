@@ -4,16 +4,14 @@
     "endpoint": "/pet",
     "summary": "Update an existing pet.",
     "parameters": [],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/pet",
-    "curl_command": "curl -X 'PUT' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/pet' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/pet"
   },
   {
     "method": "POST",
     "endpoint": "/pet",
     "summary": "Add a new pet to the store.",
     "parameters": [],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/pet",
-    "curl_command": "curl -X 'POST' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/pet' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/pet"
   },
   {
     "method": "GET",
@@ -25,11 +23,10 @@
         "in": "query",
         "type": "string",
         "required": false,
-        "example": "valeur"
+        "value": "valeur"
       }
     ],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/pet/findByStatus?status=valeur",
-    "curl_command": "curl -X 'GET' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/pet/findByStatus?status=valeur' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/pet/findByStatus?status=valeur"
   },
   {
     "method": "GET",
@@ -41,11 +38,10 @@
         "in": "query",
         "type": "array",
         "required": false,
-        "example": "valeur"
+        "value": "valeur"
       }
     ],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/pet/findByTags?tags=valeur",
-    "curl_command": "curl -X 'GET' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/pet/findByTags?tags=valeur' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/pet/findByTags?tags=valeur"
   },
   {
     "method": "GET",
@@ -57,11 +53,10 @@
         "in": "path",
         "type": "integer",
         "required": true,
-        "example": "valeur"
+        "value": "valeur"
       }
     ],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/pet/{petId}",
-    "curl_command": "curl -X 'GET' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/pet/{petId}' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/pet/{petId}"
   },
   {
     "method": "POST",
@@ -73,25 +68,24 @@
         "in": "path",
         "type": "integer",
         "required": true,
-        "example": "valeur"
+        "value": "valeur"
       },
       {
         "name": "name",
         "in": "query",
         "type": "string",
         "required": false,
-        "example": "valeur"
+        "value": "valeur"
       },
       {
         "name": "status",
         "in": "query",
         "type": "string",
         "required": false,
-        "example": "valeur"
+        "value": "valeur"
       }
     ],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/pet/{petId}?name=valeur&status=valeur",
-    "curl_command": "curl -X 'POST' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/pet/{petId}?name=valeur&status=valeur' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/pet/{petId}?name=valeur&status=valeur"
   },
   {
     "method": "DELETE",
@@ -103,18 +97,17 @@
         "in": "header",
         "type": "string",
         "required": false,
-        "example": "valeur"
+        "value": "valeur"
       },
       {
         "name": "petId",
         "in": "path",
         "type": "integer",
         "required": true,
-        "example": "valeur"
+        "value": "valeur"
       }
     ],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/pet/{petId}",
-    "curl_command": "curl -X 'DELETE' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/pet/{petId}' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/pet/{petId}"
   },
   {
     "method": "POST",
@@ -126,34 +119,31 @@
         "in": "path",
         "type": "integer",
         "required": true,
-        "example": "valeur"
+        "value": "valeur"
       },
       {
         "name": "additionalMetadata",
         "in": "query",
         "type": "string",
         "required": false,
-        "example": "valeur"
+        "value": "valeur"
       }
     ],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/pet/{petId}/uploadImage?additionalMetadata=valeur",
-    "curl_command": "curl -X 'POST' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/pet/{petId}/uploadImage?additionalMetadata=valeur' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/pet/{petId}/uploadImage?additionalMetadata=valeur"
   },
   {
     "method": "GET",
     "endpoint": "/store/inventory",
     "summary": "Returns pet inventories by status.",
     "parameters": [],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/store/inventory",
-    "curl_command": "curl -X 'GET' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/store/inventory' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/store/inventory"
   },
   {
     "method": "POST",
     "endpoint": "/store/order",
     "summary": "Place an order for a pet.",
     "parameters": [],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/store/order",
-    "curl_command": "curl -X 'POST' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/store/order' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/store/order"
   },
   {
     "method": "GET",
@@ -165,11 +155,10 @@
         "in": "path",
         "type": "integer",
         "required": true,
-        "example": "valeur"
+        "value": "valeur"
       }
     ],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/store/order/{orderId}",
-    "curl_command": "curl -X 'GET' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/store/order/{orderId}' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/store/order/{orderId}"
   },
   {
     "method": "DELETE",
@@ -181,27 +170,24 @@
         "in": "path",
         "type": "integer",
         "required": true,
-        "example": "valeur"
+        "value": "valeur"
       }
     ],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/store/order/{orderId}",
-    "curl_command": "curl -X 'DELETE' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/store/order/{orderId}' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/store/order/{orderId}"
   },
   {
     "method": "POST",
     "endpoint": "/user",
     "summary": "Create user.",
     "parameters": [],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/user",
-    "curl_command": "curl -X 'POST' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/user' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/user"
   },
   {
     "method": "POST",
     "endpoint": "/user/createWithList",
     "summary": "Creates list of users with given input array.",
     "parameters": [],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/user/createWithList",
-    "curl_command": "curl -X 'POST' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/user/createWithList' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/user/createWithList"
   },
   {
     "method": "GET",
@@ -213,26 +199,24 @@
         "in": "query",
         "type": "string",
         "required": false,
-        "example": "valeur"
+        "value": "valeur"
       },
       {
         "name": "password",
         "in": "query",
         "type": "string",
         "required": false,
-        "example": "valeur"
+        "value": "valeur"
       }
     ],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/user/login?username=valeur&password=valeur",
-    "curl_command": "curl -X 'GET' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/user/login?username=valeur&password=valeur' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/user/login?username=valeur&password=valeur"
   },
   {
     "method": "GET",
     "endpoint": "/user/logout",
     "summary": "Logs out current logged in user session.",
     "parameters": [],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/user/logout",
-    "curl_command": "curl -X 'GET' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/user/logout' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/user/logout"
   },
   {
     "method": "GET",
@@ -244,11 +228,10 @@
         "in": "path",
         "type": "string",
         "required": true,
-        "example": "valeur"
+        "value": "valeur"
       }
     ],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/user/{username}",
-    "curl_command": "curl -X 'GET' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/user/{username}' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/user/{username}"
   },
   {
     "method": "PUT",
@@ -260,11 +243,10 @@
         "in": "path",
         "type": "string",
         "required": true,
-        "example": "valeur"
+        "value": "valeur"
       }
     ],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/user/{username}",
-    "curl_command": "curl -X 'PUT' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/user/{username}' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/user/{username}"
   },
   {
     "method": "DELETE",
@@ -276,10 +258,9 @@
         "in": "path",
         "type": "string",
         "required": true,
-        "example": "valeur"
+        "value": "valeur"
       }
     ],
-    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/user/{username}",
-    "curl_command": "curl -X 'DELETE' \\\n  'https://petstore3.swagger.io/api/v3/openapi.json/user/{username}' \\\n  -H 'accept: application/json' \\\n  -H 'X-CSRFTOKEN: dummycsrftoken'"
+    "url_complete": "https://petstore3.swagger.io/api/v3/openapi.json/user/{username}"
   }
 ]
