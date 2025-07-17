@@ -64,12 +64,17 @@
                     <label for="headers" class="block text-sm font-medium">En-têtes HTTP (JSON)</label>
                     <textarea id="headers" class="mt-1 block w-full border rounded p-2" placeholder='{"Content-Type": "application/json"}'></textarea>
                 </div>
+
+                <!-- ✅ Section des boutons -->
                 <div class="flex space-x-4">
                     <button type="button" onclick="testEndpoint()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Test</button>
-                    <!-- ✅ Lien corrigé vers l’historique -->
+                    <!-- ✅ Lien vers l’historique -->
                     <a href="{% url 'scraping_data:download-history' %}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Check Details</a>
+                    <!-- ✅ Nouveau bouton pour générer le rapport pytest -->
+                    <a href="{% url 'scraping_data:generate-report' %}" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">Rapport</a>
                 </div>
             </form>
+
             <div id="response" class="mt-4 p-4 border rounded max-w-full overflow-x-auto">
                 <!-- La réponse sera insérée ici -->
             </div>

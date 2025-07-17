@@ -11,10 +11,11 @@ from .views import (
     add_project,
     edit_project,
     delete_project,
-    project_parameters,  # import de la vue pour les paramètres du projet
+    project_parameters,  # ✅ import de la vue pour les paramètres du projet
     tester_page,         # ✅ import de la vue tester_page
     test_endpoint,       # ✅ import de la vue test_endpoint
     download_history,    # ✅ import de la vue download_history
+    generate_test_report # ✅ import de la vue pour générer le rapport pytest
 )
 
 app_name = 'scraping_data'
@@ -44,4 +45,7 @@ urlpatterns = [
     path('tester/', tester_page, name='tester-page'),
     path('test_endpoint/', test_endpoint, name='test-endpoint'),
     path('download_history/', download_history, name='download-history'),
+
+    # --- ✅ Nouvelle route pour générer le rapport pytest ---
+    path('generate_report/', generate_test_report, name='generate-report'),
 ]

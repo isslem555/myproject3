@@ -7,42 +7,72 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
     body {
-      background-color: #f8f9fa;
+      background-color: #2c2c2c;
+      color: #f5f5f5;
     }
-    .card {
+    /* Effet dégradé bleu */
+    :root {
+      --gradient-blue: linear-gradient(45deg, #00bfff, #1e90ff, #4169e1);
+    }
+
+    .card, .accordion-item {
       border-radius: 0.75rem;
-      box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,.1);
+      background-color: #3a3a3a;
+      color: #f5f5f5;
+      box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,.5);
+      border: 3px solid transparent;
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+      background-image:
+        linear-gradient(#3a3a3a, #3a3a3a),
+        var(--gradient-blue);
     }
+
+    .accordion-button {
+      background-color: #3a3a3a;
+      color: #f5f5f5;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+    .accordion-button:not(.collapsed) {
+      background-color: #505050;
+      color: #ffffff;
+      box-shadow: inset 0 -1px 0 rgba(255,255,255,0.1);
+    }
+    .accordion-button:hover {
+      background-color: #444;
+      color: #fff;
+    }
+
     .endpoint-block {
-      background: #f1f3f5;
+      background: #4a4a4a;
       padding: 1rem;
       border-radius: 0.5rem;
       margin-bottom: 1rem;
+      border: 2px solid #1e90ff;
     }
     code {
-      color: #d63384;
+      color: #00d4ff;
     }
 
+    /* Navbar */
     .navbar-gradient {
-      background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
-      box-shadow: 0 4px 12px rgba(24, 40, 72, 0.3);
+      background: linear-gradient(90deg, #3a3a3a 0%, #1f1f1f 100%);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
       padding: 0.8rem 1.5rem;
-    }
-    .navbar-brand svg path {
-      fill: white;
     }
     .navbar-brand {
       font-size: 1.5rem;
-      color: white !important;
+      color: #f5f5f5 !important;
     }
     .navbar-nav .nav-link {
-      color: white !important;
+      color: #f5f5f5 !important;
       font-size: 1.05rem;
       font-weight: 600;
       transition: color 0.3s ease;
     }
     .navbar-nav .nav-link:hover {
-      color: #ffd700 !important;
+      color: #00bfff !important;
       text-decoration: underline;
     }
     .btn-light {
@@ -51,21 +81,112 @@
     }
     .btn-light:hover {
       transform: scale(1.1);
-      box-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+      box-shadow: 0 0 8px rgba(0, 191, 255, 0.7);
     }
-    .custom-toggler {
-      border-color: transparent;
+
+    /* Titre stylisé en bleu */
+    h1.title-swagger {
+      font-size: 2.5rem;
+      font-weight: 900;
+      background: var(--gradient-blue);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradientFlow 4s infinite alternate;
+      text-shadow: 0 0 10px rgba(30,144,255,0.4), 0 0 20px rgba(65,105,225,0.3);
+      margin-bottom: 2rem;
     }
-    .custom-toggler .navbar-toggler-icon {
-      background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28255, 255, 255, 1%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
-    .navbar-nav.ms-2 {
-      margin-left: 0.5rem;
+
+    .accordion-body {
+      background-color: #2c2c2c;
+      color: #f5f5f5;
     }
-    @media (max-width: 576px) {
-      .navbar-gradient {
-        padding: 0.6rem 1rem;
-      }
+    .btn-outline-primary {
+      border-color: #00bfff;
+      color: #00bfff;
+    }
+    .btn-outline-primary:hover {
+      background-color: #00bfff;
+      color: #000;
+    }
+    .btn-info {
+      background-color: #17a2b8;
+      border: none;
+    }
+    .btn-info:hover {
+      background-color: #138496;
+    }
+    .btn-warning {
+      background-color: #ffc107;
+      border: none;
+      color: #000;
+    }
+    .btn-warning:hover {
+      background-color: #e0a800;
+    }
+    .btn-success {
+      background-color: #28a745;
+      border: none;
+    }
+    .btn-success:hover {
+      background-color: #218838;
+    }
+
+    /* ====== Style bouton personnalisé (ton code CSS) ====== */
+    .custom-btn {
+      align-items: center;
+      background-image: linear-gradient(144deg, #af40ff, #5b42f3 50%, #00ddeb);
+      border: 0;
+      border-radius: 8px;
+      box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
+      box-sizing: border-box;
+      color: #ffffff !important;
+      display: flex;
+      font-size: 18px;
+      justify-content: center;
+      line-height: 1em;
+      max-width: 100%;
+      min-width: 140px;
+      padding: 3px;
+      text-decoration: none !important;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.3s;
+      height: 40px; /* fixe une hauteur pour plus de constance */
+    }
+
+    .custom-btn:active,
+    .custom-btn:hover {
+      outline: 0;
+      text-decoration: none !important;
+    }
+
+    .custom-btn span {
+      background-color: rgb(5, 6, 45);
+      padding: 16px 24px;
+      border-radius: 6px;
+      width: 100%;
+      height: 100%;
+      transition: 300ms;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .custom-btn:hover span {
+      background: none;
+    }
+
+    .custom-btn:active {
+      transform: scale(0.9);
     }
   </style>
 </head>
@@ -80,13 +201,12 @@
       MyProject
     </a>
 
-    <!-- ✅ Liens de navigation -->
     <ul class="navbar-nav d-flex flex-row align-items-center ms-2">
       <li class="nav-item">
-        <a class="nav-link text-white fw-semibold" href="{% url 'scraping_data:list-projects' %}">Projects</a>
+        <a class="nav-link fw-semibold" href="{% url 'scraping_data:list-projects' %}">Projects</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link text-white fw-semibold" href="{% url 'scraping_data:rapport-swagger-html' %}">Rapport</a>
+        <a class="nav-link fw-semibold" href="{% url 'scraping_data:rapport-swagger-html' %}">Rapport</a>
       </li>
     </ul>
 
@@ -104,62 +224,48 @@
 </nav>
 
 <div class="container py-5">
-
   <div class="mb-4 text-end">
-    <a href="{% url 'scraping_data:add-project' %}" class="btn btn-success">
-      + Ajouter un projet
+    <!-- Bouton Ajouter un projet avec style custom -->
+    <a href="{% url 'scraping_data:add-project' %}" class="custom-btn">
+      <span>+ Ajouter un projet</span>
     </a>
   </div>
 
-  <h1 class="mb-4 text-primary">Liste des Projets Swagger</h1>
+  <!-- Titre stylisé -->
+  <h1 class="title-swagger text-center">Liste des Projets Swagger</h1>
 
   {% if projets %}
     <div class="accordion" id="accordionProjects">
       {% for p in projets %}
         <div class="accordion-item mb-3">
           <h2 class="accordion-header" id="heading{{ p.id }}">
-            <button class="accordion-button collapsed bg-primary text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ p.id }}" aria-expanded="false" aria-controls="collapse{{ p.id }}">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ p.id }}" aria-expanded="false" aria-controls="collapse{{ p.id }}">
               Projet #{{ p.id }} — Créé le {{ p.created_at|date:"Y-m-d H:i" }}
             </button>
           </h2>
 
-          <!-- Boutons d’action -->
-          <div class="px-4 py-2 bg-light border-top d-flex justify-content-end flex-wrap gap-2">
-            <a href="{{ p.swagger_root_url }}" target="_blank" class="btn btn-dark btn-sm">
-              Swagger
-            </a>
-            <a href="{% url 'scraping_data:rapport-swagger-html' %}?id={{ p.id }}" class="btn btn-outline-primary btn-sm">
-              Projet
-            </a>
-            <!-- ✅ Nouveau bouton Tester -->
-            <a href="{% url 'scraping_data:tester-page' %}" class="btn btn-warning btn-sm">
-              Tester
-            </a>
-            <!-- ✅ Nouveau bouton Paramètres -->
-            <a href="{% url 'scraping_data:project-parameters' p.id %}" class="btn btn-info btn-sm">
-              Paramètres
-            </a>
-
-            <a href="{% url 'scraping_data:edit-project' p.id %}" class="btn btn-warning btn-sm">
-              Modifier
-            </a>
+          <div class="px-4 py-2 bg-dark border-top d-flex justify-content-end flex-wrap gap-2">
+            <!-- Boutons avec le style personnalisé -->
+            <a href="{{ p.swagger_root_url }}" target="_blank" class="custom-btn btn-sm"><span>Swagger</span></a>
+            <a href="{% url 'scraping_data:rapport-swagger-html' %}?id={{ p.id }}" class="custom-btn btn-sm"><span>Projet</span></a>
+            <a href="{% url 'scraping_data:tester-page' %}" class="custom-btn btn-sm"><span>Tester</span></a>
+            <a href="{% url 'scraping_data:project-parameters' p.id %}" class="custom-btn btn-sm"><span>Paramètres</span></a>
+            <a href="{% url 'scraping_data:edit-project' p.id %}" class="custom-btn btn-sm"><span>Modifier</span></a>
 
             <form action="{% url 'scraping_data:delete-project' p.id %}" method="post" onsubmit="return confirm('Voulez-vous vraiment supprimer ce projet ?');" class="d-inline">
               {% csrf_token %}
-              <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+              <button type="submit" class="custom-btn btn-sm" style="padding:0;"><span>Supprimer</span></button>
             </form>
           </div>
 
           <div id="collapse{{ p.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ p.id }}" data-bs-parent="#accordionProjects">
             <div class="accordion-body">
               <p><strong>URL Swagger :</strong>
-                <a href="{{ p.swagger_url }}" target="_blank" class="link-primary">{{ p.swagger_url }}</a>
+                <a href="{{ p.swagger_url }}" target="_blank" class="link-light text-decoration-underline">{{ p.swagger_url }}</a>
               </p>
 
               {% if p.swagger_json %}
-                <p class="text-muted small">
-                  Ce projet contient {{ p.swagger_json|length }} endpoints.
-                </p>
+                <p class="text-muted small">Ce projet contient {{ p.swagger_json|length }} endpoints.</p>
 
                 <div class="mb-3">
                   {% for ep in p.swagger_json %}
@@ -176,17 +282,15 @@
                         </span>
                         {{ ep.endpoint }}
                       </h5>
-
                       {% if ep.summary %}
                         <p class="mb-2">{{ ep.summary }}</p>
                       {% endif %}
-
                       {% if ep.parameters %}
                         <ul class="list-group list-group-flush">
                           {% for param in ep.parameters %}
-                            <li class="list-group-item">
+                            <li class="list-group-item bg-secondary text-light">
                               <strong>{{ param.in }}</strong> →
-                              <span class="text-primary">{{ param.name }}</span>
+                              <span class="text-info">{{ param.name }}</span>
                               <span class="badge bg-light text-dark ms-2">{{ param.type }}</span>
                               {% if param.value %}
                                 <span class="text-muted ms-2">Exemple : <code>{{ param.value }}</code></span>

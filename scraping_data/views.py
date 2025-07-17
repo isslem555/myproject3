@@ -4,13 +4,15 @@ from collections import Counter
 import requests
 import io
 from urllib.parse import urlparse
+import subprocess  # ✅ pour lancer pytest
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
-
+from django.utils import timezone
 from django import forms
+from django.conf import settings  # ✅ pour BASE_DIR
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -76,13 +78,11 @@ def project_parameters(request, pk):
     projet = get_object_or_404(SwaggerProject, pk=pk)
     swagger_json = projet.swagger_json or []
 
-    # Liste pour stocker les headers uniques
     headers = []
     seen_names = set()
 
     for ep in swagger_json:
         for param in ep.get("parameters", []):
-            # On ne garde que les paramètres "header"
             if param.get("in") == "header":
                 name = param.get("name")
                 if name and name not in seen_names:
@@ -281,7 +281,6 @@ def enrich_and_save(swagger_data, url):
     return swagger_data
 
 
-# --------- Vue affichage HTML rapport Swagger ---------
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def afficher_rapport_swagger(request):
@@ -345,7 +344,6 @@ def afficher_rapport_swagger(request):
     return render(request, "rapport_swagger.html", context)
 
 
-# --------- Vue POST scraping simple ---------
 @csrf_exempt
 @require_POST
 def lancer_scraping(request):
@@ -369,7 +367,6 @@ def lancer_scraping(request):
         return JsonResponse({"status": "erreur", "message": str(e)}, status=500)
 
 
-# --------- APIView SwaggerScrapeAPIView ---------
 class SwaggerScrapeAPIView(APIView):
     def post(self, request):
         try:
@@ -395,29 +392,21 @@ class SwaggerScrapeAPIView(APIView):
             return Response({"status": "erreur", "message": str(e)}, status=500)
 
 
-# --------- Génération simple PDF rapport Swagger ---------
 def rapport_swagger_pdf(request):
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=A4)
-
     p.drawString(100, 800, "Rapport Swagger PDF")
     p.drawString(100, 780, "Ceci est un exemple de génération de PDF.")
-
     p.showPage()
     p.save()
-
     buffer.seek(0)
     return FileResponse(buffer, as_attachment=True, filename='rapport_swagger.pdf')
 
 
 # ======================= VUES TEST API ========================
-from django.utils import timezone
-
-# variable globale pour l'historique
 test_history = []
 
 def tester_page(request):
-    # affiche la page avec le formulaire
     return render(request, "tester.html")
 
 @csrf_exempt
@@ -431,14 +420,12 @@ def test_endpoint(request):
     body = data.get('body', {})
     headers = data.get('headers', {})
 
-    # Validation NASA
     if 'api.nasa.gov' in url and 'api_key' not in params:
         return JsonResponse({
             'status': 'error',
             'error': 'Clé API NASA (api_key) requise pour cet endpoint'
         }, status=400)
 
-    # Remplacement path vars
     formatted_url = url
     for key, value in path_vars.items():
         formatted_url = formatted_url.replace(f'{{{key}}}', value)
@@ -453,7 +440,6 @@ def test_endpoint(request):
             timeout=5
         )
 
-        # statut
         if 200 <= resp.status_code <= 299:
             test_status = "succeeded" if resp.status_code == 201 else "passed"
         else:
@@ -496,16 +482,35 @@ def test_endpoint(request):
         test_history.append(entry)
         return JsonResponse({'status': 'error', 'error': str(e)}, status=500)
 
+
 def download_history(request):
-    # construire le fichier JSON
     buffer = io.StringIO()
     json.dump(test_history, buffer, indent=2)
     buffer.seek(0)
-
     mem = io.BytesIO()
     mem.write(buffer.getvalue().encode('utf-8'))
     mem.seek(0)
-
     response = HttpResponse(mem, content_type='application/json')
     response['Content-Disposition'] = 'attachment; filename=test_history.json'
     return response
+
+
+# ======================= ✅ NOUVELLE VUE POUR LE RAPPORT PYTEST ========================
+def generate_test_report(request):
+    """
+    Lance pytest et génère un rapport HTML dans un fichier temporaire.
+    Renvoie ensuite le fichier en téléchargement.
+    """
+    report_path = os.path.join(settings.BASE_DIR, "pytest_report.html")
+    subprocess.run([
+        "pytest",
+        "--disable-warnings",
+        "--maxfail=1",
+        "--html=" + report_path,
+        "--self-contained-html"
+    ], cwd=settings.BASE_DIR)
+
+    with open(report_path, "rb") as f:
+        response = HttpResponse(f.read(), content_type='text/html')
+        response['Content-Disposition'] = 'attachment; filename=rapport_tests.html'
+        return response
