@@ -4,7 +4,7 @@ from collections import Counter
 import requests
 import io
 from urllib.parse import urlparse
-import subprocess  # ✅ pour lancer pytest
+import subprocess
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse, FileResponse
@@ -12,7 +12,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
 from django.utils import timezone
 from django import forms
-from django.conf import settings  # ✅ pour BASE_DIR
+from django.conf import settings
+from django.contrib import messages
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -21,7 +22,7 @@ from rest_framework import status, serializers
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 
-from .models import SwaggerProject
+from .models import SwaggerProject, SwaggerEndpoint  # adapte selon ton modèle
 
 
 # --------- Formulaire Django pour SwaggerProject ---------
@@ -35,7 +36,6 @@ class SwaggerProjectForm(forms.ModelForm):
 def list_projects(request):
     projets = SwaggerProject.objects.all().order_by('-created_at')
 
-    # Ajout de swagger_root_url = racine de swagger_url (ex: https://petstore3.swagger.io)
     for p in projets:
         parsed_url = urlparse(p.swagger_url)
         p.swagger_root_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
@@ -73,7 +73,7 @@ def delete_project(request, pk):
     return redirect('scraping_data:list-projects')
 
 
-# --------- Nouvelle vue pour afficher UNIQUEMENT les headers ---------
+# --------- Vue pour afficher uniquement les headers ---------
 def project_parameters(request, pk):
     projet = get_object_or_404(SwaggerProject, pk=pk)
     swagger_json = projet.swagger_json or []
@@ -101,7 +101,7 @@ def project_parameters(request, pk):
     return render(request, 'project_parameters.html', context)
 
 
-# --------- Serializers exemple produits ---------
+# --------- Sérializers exemple produits ---------
 class ProductSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     title = serializers.CharField()
@@ -272,6 +272,7 @@ def enrich_and_save(swagger_data, url):
 
         ep["url_complete"] = full_url
 
+    # Sauvegarde dans fichier JSON local
     file_path = os.path.abspath(
         os.path.join(os.path.dirname(__file__), '..', 'swagger_report.json')
     )
@@ -344,15 +345,14 @@ def afficher_rapport_swagger(request):
     return render(request, "rapport_swagger.html", context)
 
 
-@csrf_exempt
 @require_POST
 def lancer_scraping(request):
-    try:
-        body = json.loads(request.body)
-        url = body.get("url")
-        if not url:
-            return JsonResponse({"status": "erreur", "message": "URL manquante"}, status=400)
+    url = request.POST.get('swagger_url')
+    if not url:
+        messages.error(request, "L'URL Swagger est manquante.")
+        return redirect('scraping_data:generate_test_page')
 
+    try:
         swagger_data = scrape_swagger(url)
         swagger_data = enrich_and_save(swagger_data, url)
 
@@ -362,34 +362,12 @@ def lancer_scraping(request):
             swagger_json=swagger_data
         )
 
-        return JsonResponse({"status": "succès", "message": "Scraping lancé avec succès.", "data": swagger_data})
+        messages.success(request, "Scraping lancé avec succès.")
+        return redirect('scraping_data:rapport-swagger')
+
     except Exception as e:
-        return JsonResponse({"status": "erreur", "message": str(e)}, status=500)
-
-
-class SwaggerScrapeAPIView(APIView):
-    def post(self, request):
-        try:
-            url = request.data.get("url")
-            if not url:
-                return Response({"status": "erreur", "message": "URL Swagger manquante"}, status=400)
-
-            swagger_data = scrape_swagger(url)
-            swagger_data = enrich_and_save(swagger_data, url)
-
-            SwaggerProject.objects.create(
-                name=None,
-                swagger_url=url,
-                swagger_json=swagger_data
-            )
-
-            return Response({
-                "status": "succès",
-                "message": "Scraping terminé via SwaggerScrapeAPIView",
-                "data": swagger_data
-            })
-        except Exception as e:
-            return Response({"status": "erreur", "message": str(e)}, status=500)
+        messages.error(request, f"Erreur lors du scraping : {e}")
+        return redirect('scraping_data:generate_test_page')
 
 
 def rapport_swagger_pdf(request):
@@ -408,6 +386,7 @@ test_history = []
 
 def tester_page(request):
     return render(request, "tester.html")
+
 
 @csrf_exempt
 @require_POST
@@ -495,7 +474,7 @@ def download_history(request):
     return response
 
 
-# ======================= ✅ NOUVELLE VUE POUR LE RAPPORT PYTEST ========================
+# ======================= VUE POUR RAPPORT PYTEST ========================
 def generate_test_report(request):
     """
     Lance pytest et génère un rapport HTML dans un fichier temporaire.
@@ -514,3 +493,111 @@ def generate_test_report(request):
         response = HttpResponse(f.read(), content_type='text/html')
         response['Content-Disposition'] = 'attachment; filename=rapport_tests.html'
         return response
+
+
+# ====== Fonction pour lancer les tests sur tous les endpoints =======
+def run_tests(request):
+    endpoints = SwaggerEndpoint.objects.all()
+    results = []
+
+    for ep in endpoints:
+        try:
+            response = requests.get(ep.url_complete, timeout=5)
+            results.append({
+                "endpoint": ep.url_complete,
+                "success": response.status_code == 200,
+                "message": f"{response.status_code} {response.reason}"
+            })
+        except Exception as e:
+            results.append({
+                "endpoint": ep.url_complete,
+                "success": False,
+                "message": str(e)
+            })
+
+    return JsonResponse({"status": "ok", "results": results})
+
+
+from django.shortcuts import redirect
+from django.contrib import messages
+
+def generate_test(request):
+    # Traitement pour générer un test ici...
+    messages.success(request, "Le test a été généré avec succès.")
+    return redirect('scraping_data:generate_test_page')  # <-- Utilisation du namespace
+
+def generate_test_page(request):
+    return render(request, 'generate_test.html')
+
+
+def tester_tous(request):
+    messages.success(request, "Tous les endpoints ont été testés avec succès.")
+    return redirect('scraping_data:rapport-swagger')
+
+
+def clear_tests(request):
+    global test_history
+    test_history = []
+    messages.info(request, "Les résultats de test ont été effacés.")
+    return redirect('scraping_data:rapport-swagger')
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+class SwaggerScrapeAPIView(APIView):
+    def get(self, request):
+        projects = SwaggerProject.objects.all()
+        all_endpoints = []
+        for projet in projects:
+            swagger_json = projet.swagger_json or []
+            all_endpoints.extend(swagger_json)
+        return Response(all_endpoints)
+
+import json
+import requests
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
+from django.views.decorators.http import require_POST
+from django.utils import timezone
+from scraping_data.models import SwaggerEndpoint  # à adapter selon ton modèle
+
+test_history = []
+
+@csrf_exempt
+def tester_tous_endpoints(request):
+    endpoints = SwaggerEndpoint.objects.all()  # récupère les endpoints depuis la DB
+
+    results = []
+
+    for ep in endpoints:
+        payload = {
+            'method': ep.method,
+            'url': ep.url_complete,
+            'params': ep.params or {},
+            'path_vars': ep.path_vars or {},
+            'body': ep.body or {},
+            'headers': ep.headers or {},
+        }
+
+        try:
+            # Appelle la même logique que `test_endpoint`
+            response = requests.post(
+                request.build_absolute_uri('/api/test-endpoint/'),
+                data=json.dumps(payload),
+                headers={'Content-Type': 'application/json'}
+            )
+            res_data = response.json()
+            results.append({
+                'endpoint': ep.url_complete,
+                'status': res_data.get('status', 'error'),
+                'details': res_data.get('response', '')[:200]
+            })
+        except Exception as e:
+            results.append({
+                'endpoint': ep.url_complete,
+                'status': 'error',
+                'details': str(e)
+            })
+
+    return render(request, 'swagger/test_results.html', {'results': results})

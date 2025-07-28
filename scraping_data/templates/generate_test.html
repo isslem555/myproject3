@@ -18,7 +18,7 @@
       min-height: 100vh;
       transition: background-color 0.3s ease;
     }
-    /* Navbar (copie la même que la page principale) */
+    /* Navbar identique à ta page principale */
     .navbar {
       background-color: #ffffff;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -30,22 +30,13 @@
       user-select: none;
       transition: color 0.3s ease, transform 0.2s ease;
     }
-    .navbar-brand svg path {
-      fill: #1f2937;
-      transition: fill 0.3s ease;
-    }
-    .nav-link:hover {
-      color: #3b82f6 !important;
-      transform: translateY(-2px);
-    }
     .brand-container {
       display: flex;
       align-items: center;
       gap: 1.5rem;
       flex-wrap: wrap;
     }
-
-    /* Form */
+    /* Form styles */
     input.form-control-lg {
       border-radius: 10px;
       border: 1px solid #d1d5db;
@@ -53,27 +44,15 @@
       color: #1f2937;
       font-size: 1.15rem;
       padding: 0.9rem 1.5rem;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
       font-family: 'Fira Code', monospace;
       letter-spacing: 0.02em;
-    }
-    input.form-control-lg::placeholder {
-      color: #6b7280;
-      font-style: italic;
+      transition: border-color 0.3s ease;
     }
     input.form-control-lg:focus {
       border-color: #3b82f6;
       box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
-      transform: scale(1.01);
+      outline: none;
     }
-    input.is-invalid {
-      border-color: #ef4444;
-      box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
-      background-color: #fef2f2;
-      color: #1f2937;
-    }
-
-    /* Bouton */
     button[type="submit"] {
       background: linear-gradient(135deg, #3b82f6, #1e3a8a);
       border: none;
@@ -84,68 +63,25 @@
       color: #ffffff;
       cursor: pointer;
       user-select: none;
-      position: relative;
-      overflow: hidden;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    button[type="submit"]:hover:not(:disabled) {
+    button[type="submit"]:hover {
       transform: translateY(-3px);
       box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4);
     }
-    button[type="submit"]:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    button[type="submit"]::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      transition: width 0.6s ease, height 0.6s ease;
-    }
-    button[type="submit"]:hover::after {
-      width: 200%;
-      height: 200%;
-    }
-
-    /* Status */
-    #status {
-      font-weight: 600;
-      color: #3b82f6;
-      min-height: 1.5rem;
-      text-align: center;
-      font-size: 1.1rem;
-      user-select: none;
-      margin-bottom: 1rem;
-      transition: opacity 0.3s ease;
-    }
-
-    /* Responsive */
-    @media (max-width: 576px) {
-      .navbar {
-        padding: 0.75rem 1rem;
-      }
-      .brand-container {
-        justify-content: center;
-      }
-      button[type="submit"] {
-        width: 100%;
-      }
+    .container {
+      padding-top: 5rem;
+      max-width: 600px;
     }
   </style>
 </head>
 <body>
 
-<!-- NAVBAR -->
+<!-- Navbar -->
 <nav class="navbar navbar-expand-lg shadow-sm">
   <div class="container">
     <div class="brand-container">
-      <a class="navbar-brand d-flex align-items-center fw-bold" href="#">
+      <a class="navbar-brand d-flex align-items-center fw-bold" href="{% url 'scraping_data:rapport-swagger' %}">
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#1f2937" stroke-width="2" class="me-2" viewBox="0 0 16 16" stroke-linejoin="round" stroke-linecap="round">
           <path d="M8 0L3 16h10L8 0z"/>
         </svg>
@@ -153,86 +89,29 @@
       </a>
       <a href="{% url 'scraping_data:list-projects' %}" class="nav-link">Projects</a>
     </div>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarMain">
-      <ul class="navbar-nav ms-auto align-items-center">
-        <li class="nav-item mx-2">
-          <a class="btn btn-outline-primary btn-sm px-4 rounded-pill fw-semibold" href="#">Get Started</a>
-        </li>
-      </ul>
-    </div>
   </div>
 </nav>
 
-<!-- CONTENU -->
-<div class="container py-5">
-  <h1 class="text-center mb-5" style="color: #3b82f6; font-weight: 700;">Générer un test Swagger</h1>
-
-  <form id="swagger-form" class="row g-3 justify-content-center mb-5" novalidate>
-    <div class="col-sm-10 col-md-8">
+<!-- Formulaire -->
+<div class="container">
+  <h1 class="text-center mb-4" style="color:#3b82f6;">Générer un test Swagger</h1>
+  <form method="POST" action="{% url 'scraping_data:lancer-scraping' %}">
+    {% csrf_token %}
+    <div class="mb-3">
       <input
         type="url"
-        id="swagger-url"
+        name="swagger_url"
         class="form-control form-control-lg"
-        placeholder="Exemple : https://petstore.swagger.io/v2/swagger.json"
+        placeholder="Entrez l'URL Swagger ici"
         required
       />
-      <div class="invalid-feedback">Veuillez entrer une URL Swagger valide.</div>
     </div>
-    <div class="col-sm-2 col-md-2 d-grid">
-      <button type="submit" id="btn-submit">Lancer Scraping</button>
+    <div class="d-grid">
+      <button type="submit">Lancer Scraping</button>
     </div>
   </form>
-
-  <div id="status" aria-live="polite"></div>
 </div>
 
-<script>
-  const form = document.getElementById('swagger-form');
-  const urlInput = document.getElementById('swagger-url');
-  const statusDiv = document.getElementById('status');
-  const btnSubmit = document.getElementById('btn-submit');
-
-  function validateURL(url) {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const url = urlInput.value.trim();
-
-    if (!validateURL(url)) {
-      urlInput.classList.add('is-invalid');
-      statusDiv.textContent = 'URL invalide. Veuillez corriger.';
-      return;
-    } else {
-      urlInput.classList.remove('is-invalid');
-      statusDiv.textContent = '';
-    }
-
-    // Désactiver le bouton pendant le traitement
-    btnSubmit.disabled = true;
-    statusDiv.textContent = 'Scraping en cours... Patientez...';
-
-    // Simuler appel API ou redirection, ici tu remplaces par ton fetch réel
-    setTimeout(() => {
-      statusDiv.textContent = 'Scraping terminé avec succès !';
-      btnSubmit.disabled = false;
-
-      // Optionnel : rediriger vers la page rapport avec le résultat
-      // window.location.href = "/rapport-swagger/";
-    }, 2500);
-  });
-</script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>

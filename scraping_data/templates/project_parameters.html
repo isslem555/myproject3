@@ -1,296 +1,49 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Rapport Swagger dynamique</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <title>Headers du Projet {{ projet.id }}</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <!-- Ajout Font Awesome pour l’icône Tester -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-  <style>
-    .method-badge {
-      font-weight: 700;
-      text-transform: uppercase;
-      font-size: 0.85rem;
-      padding: 0.35em 0.8em;
-      border-radius: 1rem;
-      color: white;
-      user-select: none;
-      min-width: 65px;
-      text-align: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-    }
-    .method-get { background-color: #61affe; }
-    .method-post { background-color: #49cc90; }
-    .method-put { background-color: #fca130; }
-    .method-delete { background-color: #f93e3e; }
-    .method-patch { background-color: #50e3c2; }
-    .method-head { background-color: #9012fe; }
-    .method-options { background-color: #0d5aa7; }
-
-    pre {
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      font-size: 0.9rem;
-    }
-
-    /* ===== Navbar moderne & attirante ===== */
-    .navbar-gradient {
-      background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
-      box-shadow: 0 4px 12px rgba(24, 40, 72, 0.3);
-      padding: 0.8rem 1.5rem;
-    }
-    .navbar-brand svg path {
-      fill: white;
-    }
-    .navbar-brand {
-      font-size: 1.5rem;
-      color: white !important;
-    }
-    /* Conteneur pour aligner MyProject + Projects */
-    .brand-container {
-      display: flex;
-      align-items: center;
-    }
-    .brand-container a.navbar-brand {
-      margin-right: 1rem;
-      display: flex;
-      align-items: center;
-    }
-    .brand-container .nav-link-projects {
-      color: white !important;
-      font-size: 1.05rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: color 0.3s ease;
-      padding-left: 0;
-      padding-right: 0;
-    }
-    .brand-container .nav-link-projects:hover {
-      color: #ffd700 !important;
-      text-decoration: underline;
-    }
-
-    .navbar-nav .nav-link {
-      color: white !important;
-      font-size: 1.05rem;
-      transition: color 0.3s ease;
-      font-weight: 600;
-    }
-    .navbar-nav .nav-link:hover {
-      color: #ffd700 !important; /* Jaune or */
-      text-decoration: underline;
-    }
-    .btn-light {
-      font-weight: 600;
-      transition: transform 0.25s ease;
-    }
-    .btn-light:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
-    }
-    .custom-toggler {
-      border-color: transparent;
-    }
-    .custom-toggler .navbar-toggler-icon {
-      background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28255, 255, 255, 1%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
-    }
-    @media (max-width: 576px) {
-      .navbar-gradient {
-        padding: 0.6rem 1rem;
-      }
-      /* Sur mobile, espace un peu moins large et stacking */
-      .brand-container {
-        flex-wrap: wrap;
-      }
-      .brand-container .nav-link-projects {
-        margin-top: 0.5rem;
-      }
-    }
-  </style>
 </head>
 <body class="bg-light">
+<div class="container py-5">
 
-<!-- NAVBAR MODERNE & ATTIRANTE -->
-<nav class="navbar navbar-expand-lg navbar-gradient shadow-sm">
-  <div class="container">
+  <h1 class="mb-4 text-primary">Headers du Projet #{{ projet.id }}</h1>
 
-    <!-- Conteneur pour aligner MyProject + Projects -->
-    <div class="brand-container">
-      <!-- Logo / Nom -->
-      <a class="navbar-brand d-flex align-items-center fw-bold" href="#">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="white" class="me-2" viewBox="0 0 16 16">
-          <path d="M8 0L3 16h10L8 0z"/>
-        </svg>
-        MyProject
-      </a>
-      <!-- Projects à côté -->
-      <a href="{% url 'scraping_data:list-projects' %}" class="nav-link-projects">Projects</a>
-    </div>
+  <a href="{% url 'scraping_data:list-projects' %}" class="btn btn-secondary mb-4">← Retour à la liste</a>
 
-    <!-- Burger menu -->
-    <button class="navbar-toggler custom-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <!-- Menu à droite -->
-    <div class="collapse navbar-collapse" id="navbarMain">
-      <ul class="navbar-nav ms-auto align-items-center">
-        <li class="nav-item mx-2">
-          <a class="btn btn-light btn-sm px-4 rounded-pill shadow-sm" href="#">Get Started</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
-
-<!-- 🧾 CONTENU DU RAPPORT -->
-<div class="container py-4">
-  <h1 class="text-center mb-4 text-primary fw-bold">Rapport Swagger dynamique</h1>
-
-  <form id="swagger-form" class="row g-3 justify-content-center mb-4" novalidate>
-    <div class="col-sm-10 col-md-8">
-      <input type="url" id="swagger-url" class="form-control form-control-lg" placeholder="Exemple : https://petstore.swagger.io/v2/swagger.json" required />
-      <div class="invalid-feedback">Veuillez entrer une URL Swagger valide.</div>
-    </div>
-    <div class="col-sm-2 col-md-2 d-grid">
-      <button type="submit" class="btn btn-primary btn-lg">Lancer Scraping</button>
-    </div>
-  </form>
-
-  <div id="status" class="text-center mb-3 fs-5"></div>
-
-  <div class="text-center mb-3">
-    <a href="{% url 'scraping_data:list-projects' %}" class="btn btn-outline-secondary">
-      📚 Voir les projets Swagger enregistrés
-    </a>
-  </div>
-
-  <hr />
-
-  <div id="rapport-container" class="table-responsive">
-    {% if swagger_data %}
-    <table class="table table-hover align-middle shadow-sm bg-white rounded" aria-describedby="rapport-description">
-      <caption id="rapport-description" class="visually-hidden">
-        Liste des endpoints Swagger extraits.
-      </caption>
-      <thead class="table-primary text-primary text-uppercase">
+  {% if headers %}
+    <table class="table table-bordered table-hover">
+      <thead class="table-dark">
         <tr>
-          <th scope="col">Méthode</th>
-          <th scope="col">Endpoint complet</th>
-          <th scope="col">Résumé</th>
-          <th scope="col">Paramètres</th>
-          <th scope="col">Commande cURL</th>
+          <th>Nom</th>
+          <th>Type</th>
+          <th>Obligatoire ?</th>
+          <th>Exemple</th>
         </tr>
       </thead>
       <tbody>
-        {% for ep in swagger_data %}
-        <tr>
-          <td>
-            <span class="method-badge method-{{ ep.method|lower }}">{{ ep.method }}</span>
-          </td>
-          <td>
-            <code>{{ ep.url_complete }}</code>
-            <div class="mt-2">
-              <a href="{% url 'scraping_data:tester-page' %}" class="btn btn-outline-primary btn-sm">
-                <i class="fas fa-vial me-1"></i>Tester
-              </a>
-            </div>
-          </td>
-          <td>{{ ep.summary|default:"(Pas de résumé)" }}</td>
-          <td>
-            {% if ep.parameters %}
-            <ul class="mb-0" style="max-height: 120px; overflow-y: auto; padding-left: 1rem;">
-              {% for p in ep.parameters %}
-              <li><strong>{{ p.name }}</strong> ({{ p.in }}, {{ p.type }}, requis: {{ p.required }})</li>
-              {% endfor %}
-            </ul>
-            {% else %}
-            <span class="text-muted fst-italic">Aucun</span>
-            {% endif %}
-          </td>
-          <td><pre>{{ ep.curl_command }}</pre></td>
-        </tr>
+        {% for h in headers %}
+          <tr>
+            <td><strong>{{ h.name }}</strong></td>
+            <td>{{ h.type }}</td>
+            <td>
+              {% if h.required %}
+                <span class="badge bg-danger">Oui</span>
+              {% else %}
+                <span class="badge bg-success">Non</span>
+              {% endif %}
+            </td>
+            <td><code>{{ h.example }}</code></td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>
-    {% else %}
-    <p class="text-center fs-5 text-muted mt-5">
-      Aucun rapport Swagger disponible. Lancez le scraping via le formulaire ci-dessus.
-    </p>
-    {% endif %}
-  </div>
+  {% else %}
+    <p class="text-muted">Aucun header trouvé pour ce projet.</p>
+  {% endif %}
 
-  <footer class="text-center mt-5 mb-4 text-secondary small">
-    <a href="{% url 'scraping_data:list-projects' %}" class="text-decoration-none text-primary fw-semibold">
-      Voir les projets Swagger 📚
-    </a>
-  </footer>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-(() => {
-  const form = document.getElementById('swagger-form');
-  const urlInput = document.getElementById('swagger-url');
-  const statusDiv = document.getElementById('status');
-  const btn = form.querySelector('button');
-
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    if (!urlInput.checkValidity()) {
-      urlInput.classList.add('is-invalid');
-      statusDiv.textContent = "⚠️ Veuillez entrer une URL Swagger valide.";
-      return;
-    }
-    urlInput.classList.remove('is-invalid');
-    btn.disabled = true;
-    statusDiv.textContent = "⏳ Scraping en cours...";
-
-    fetch("{% url 'scraping_data:lancer-scraping' %}", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCookie("csrftoken")
-      },
-      body: JSON.stringify({ url: urlInput.value.trim() })
-    })
-    .then(resp => resp.json())
-    .then(data => {
-      if (data.status === "succès") {
-        statusDiv.textContent = "✅ Scraping réussi, mise à jour du rapport.";
-        setTimeout(() => location.reload(), 1200);
-      } else if (data.status === "erreur") {
-        statusDiv.textContent = "❌ Erreur : " + data.message;
-      } else {
-        statusDiv.textContent = "❌ Réponse inattendue du serveur.";
-      }
-    })
-    .catch(err => {
-      statusDiv.textContent = "❌ Erreur réseau : " + err;
-    })
-    .finally(() => {
-      btn.disabled = false;
-    });
-  });
-
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      let cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        let cookie = cookies[i].trim();
-        if (cookie.startsWith(name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
-})();
-</script>
-
 </body>
 </html>

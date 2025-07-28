@@ -17,3 +17,15 @@ class SwaggerProject(models.Model):
 
     def __str__(self):
         return self.name or f"Swagger Project {self.id}"
+
+
+class SwaggerEndpoint(models.Model):
+    project = models.ForeignKey(SwaggerProject, on_delete=models.CASCADE, related_name='endpoints')
+    method = models.CharField(max_length=10)
+    endpoint = models.CharField(max_length=500)
+    url_complete = models.URLField()
+    summary = models.TextField(blank=True, null=True)
+    parameters = models.JSONField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.method} {self.endpoint}"
