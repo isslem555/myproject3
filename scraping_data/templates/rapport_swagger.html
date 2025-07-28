@@ -9,23 +9,30 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
 
   <style>
+    /* Polices améliorées et lissage */
     body {
       background-color: #f3f4f6;
       color: #1f2937;
-      font-family: 'Inter', Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       padding: 0;
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      font-size: 16px;
+      line-height: 1.6;
       transition: background-color 0.3s ease;
     }
     .navbar {
       background-color: #ffffff;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       padding: 1rem 2rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+      letter-spacing: 0.03em;
     }
     .navbar-brand, .nav-link {
       color: #1f2937 !important;
-      font-weight: 600;
       user-select: none;
       transition: color 0.3s ease, transform 0.2s ease;
     }
@@ -48,12 +55,13 @@
       border: none;
       border-radius: 0.375rem;
       padding: 0.75rem 1.5rem;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 1.125rem;
       color: white;
       user-select: none;
       transition: background-color 0.3s ease, transform 0.2s ease;
       cursor: pointer;
+      letter-spacing: 0.03em;
     }
     .btn-primary:hover {
       background-color: #2563eb;
@@ -64,7 +72,7 @@
       border: none;
       border-radius: 0.375rem;
       padding: 0.75rem 1.5rem;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 1.125rem;
       color: white;
       user-select: none;
@@ -73,9 +81,30 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
+      letter-spacing: 0.03em;
     }
     .btn-success:hover {
       background-color: #16a34a;
+      transform: translateY(-2px);
+    }
+    .btn-danger {
+      background-color: #ef4444;
+      border: none;
+      border-radius: 0.375rem;
+      padding: 0.75rem 1.5rem;
+      font-weight: 700;
+      font-size: 1.125rem;
+      color: white;
+      user-select: none;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      letter-spacing: 0.03em;
+    }
+    .btn-danger:hover {
+      background-color: #dc2626;
       transform: translateY(-2px);
     }
     .table-responsive {
@@ -87,18 +116,19 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.95rem;
+      font-size: 1rem;
       color: #1f2937;
       background-color: #ffffff;
+      letter-spacing: 0.02em;
     }
     thead th {
       background-color: #e5e7eb;
-      padding: 14px 16px;
+      padding: 16px 18px;
       font-weight: 700;
       border-bottom: 2px solid #d1d5db;
       user-select: none;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.07em;
     }
     tbody tr {
       border-bottom: 1px solid #d1d5db;
@@ -109,18 +139,19 @@
       transform: translateY(-2px);
     }
     tbody td {
-      padding: 14px 16px;
+      padding: 16px 18px;
       vertical-align: middle;
       word-break: break-word;
+      font-weight: 500;
     }
     tbody td code {
       display: inline-block;
       background-color: #eff6ff;
-      padding: 6px 12px;
+      padding: 7px 13px;
       border-radius: 8px;
       font-family: 'Fira Code', monospace;
       color: #1e40af;
-      font-weight: 500;
+      font-weight: 600;
       white-space: nowrap;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
@@ -129,23 +160,25 @@
       box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
     }
     td pre {
-      max-width: 300px;
+      max-width: 320px;
       white-space: pre-wrap;
       word-break: break-word;
       background-color: #e0e7ff;
       border-radius: 8px;
-      padding: 0.5rem;
+      padding: 0.6rem;
       font-family: 'Fira Code', monospace;
       color: #1e40af;
+      font-weight: 600;
+      letter-spacing: 0.02em;
     }
     .btn-tester {
       background: linear-gradient(135deg, #1e40af, #1e1b4b);
       border: none;
       border-radius: 20px;
-      padding: 0.5rem 1.75rem;
+      padding: 0.45rem 1.4rem;
       color: #ffffff;
-      font-weight: 600;
-      font-size: 0.9rem;
+      font-weight: 700;
+      font-size: 0.95rem;
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
@@ -154,10 +187,20 @@
       overflow: hidden;
       cursor: pointer;
       user-select: none;
+      line-height: 1.2;
+      min-height: 38px;
+      max-width: 140px;
+      white-space: nowrap;
+      justify-content: center;
+      letter-spacing: 0.04em;
+    }
+    .btn-tester i {
+      font-size: 1.1rem;
+      line-height: 1;
     }
     .btn-tester:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.45);
     }
     .btn-tester::after {
       content: '';
@@ -166,7 +209,7 @@
       left: 50%;
       width: 0;
       height: 0;
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.22);
       border-radius: 50%;
       transform: translate(-50%, -50%);
       transition: width 0.6s ease, height 0.6s ease;
@@ -176,10 +219,10 @@
       height: 200%;
     }
     .method-badge {
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
-      font-size: 0.85rem;
-      padding: 0.4em 1em;
+      font-size: 0.9rem;
+      padding: 0.45em 1.2em;
       border-radius: 12px;
       color: #ffffff;
       user-select: none;
@@ -187,6 +230,7 @@
       text-align: center;
       transition: transform 0.3s ease, opacity 0.3s ease;
       display: inline-block;
+      letter-spacing: 0.05em;
     }
     .method-badge:hover {
       transform: scale(1.05);
@@ -201,28 +245,31 @@
     .method-options { background-color: #6b7280; }
     footer {
       margin-top: 3rem;
-      font-size: 1rem;
+      font-size: 1.05rem;
       color: #6b7280;
       text-align: center;
       user-select: none;
+      letter-spacing: 0.03em;
     }
     footer a {
       color: #3b82f6;
-      font-weight: 600;
+      font-weight: 700;
       text-decoration: none;
       transition: color 0.3s ease, transform 0.2s ease;
+      letter-spacing: 0.03em;
     }
     footer a:hover {
       color: #60a5fa;
       transform: translateY(-2px);
     }
-    a.btn-tester:focus, .btn-primary:focus, .btn-success:focus {
+    a.btn-tester:focus, .btn-primary:focus, .btn-success:focus, .btn-danger:focus {
       outline: 3px solid #2563eb;
       outline-offset: 2px;
     }
     @media (max-width: 576px) {
       .navbar {
         padding: 0.75rem 1rem;
+        font-size: 1rem;
       }
       .brand-container {
         justify-content: center;
@@ -230,6 +277,10 @@
       .btn-tester {
         width: 100%;
         justify-content: center;
+      }
+      tbody td, thead th {
+        font-size: 0.9rem;
+        padding: 12px 10px;
       }
     }
   </style>
@@ -272,10 +323,20 @@
   </div>
 
   <!-- Bouton Tester tous -->
-  <div class="text-center mb-5">
+  <div class="text-center mb-3">
     <a href="{% url 'scraping_data:tester-tous' %}" class="btn btn-success btn-lg">
       <i class="fas fa-vials me-2"></i> Tester tous les endpoints
     </a>
+  </div>
+
+  <!-- Bouton Clean tests -->
+  <div class="text-center mb-5">
+    <form method="post" action="{% url 'scraping_data:clean_tests' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger btn-lg">
+        <i class="fas fa-trash-alt me-2"></i> Clean tests
+      </button>
+    </form>
   </div>
 
   <div id="status"></div>
@@ -293,6 +354,7 @@
           <th scope="col">Méthode</th>
           <th scope="col">Endpoint complet</th>
           <th scope="col">Résumé</th>
+          <th scope="col">Tester</th>
           <th scope="col">Paramètres</th>
           <th scope="col">Commande cURL</th>
         </tr>
@@ -305,13 +367,13 @@
           </td>
           <td>
             <code>{{ ep.url_complete }}</code>
-            <div class="mt-2">
-              <a href="{% url 'scraping_data:tester-page' %}" class="btn-tester" role="button">
-                <i class="fas fa-vial me-1"></i>Tester
-              </a>
-            </div>
           </td>
           <td>{{ ep.summary|default:"(Pas de résumé)" }}</td>
+          <td>
+            <a href="{% url 'scraping_data:tester-page' %}" class="btn-tester" role="button" aria-label="Tester l'endpoint {{ ep.url_complete }}">
+              <i class="fas fa-vial me-1" aria-hidden="true"></i>Tester
+            </a>
+          </td>
           <td>
             {% if ep.parameters %}
             <ul>
@@ -343,7 +405,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 
 </body>
 </html>

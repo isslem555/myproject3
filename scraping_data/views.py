@@ -601,3 +601,19 @@ def tester_tous_endpoints(request):
             })
 
     return render(request, 'swagger/test_results.html', {'results': results})
+
+
+from django.shortcuts import redirect
+from django.contrib import messages
+from django.views.decorators.http import require_POST
+
+# ======================= ✅ NOUVELLE VUE CLEAN TESTS ========================
+@csrf_exempt
+@require_POST
+def clean_tests(request):
+    """
+    Réinitialise l'historique des tests.
+    """
+    global test_history
+    test_history.clear()
+    return JsonResponse({"status": "succès", "message": "Historique des tests nettoyé."})

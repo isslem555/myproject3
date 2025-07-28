@@ -39,5 +39,8 @@ urlpatterns = [
     path('generate-test-page/', views.generate_test_page, name='generate_test_page'),
     path('test-endpoint/', views.test_endpoint, name='test-endpoint'),
     path('tester-tous/', views.tester_tous_endpoints, name='tester-tous'),
+    path('clean-tests/', views.clean_tests, name='clean_tests'),
 ]
+
+
 
