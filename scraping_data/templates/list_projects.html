@@ -292,10 +292,10 @@
 
   <div class="container py-5">
     <div class="text-end mb-4">
-      <a href="{% url 'scraping_data:add-project' %}" class="custom-btn"><i class="fas fa-plus me-2"></i>Ajouter un projet</a>
+      <a href="{% url 'scraping_data:add-project' %}" class="custom-btn"><i class="fas fa-plus me-2"></i> add project</a>
     </div>
 
-    <h1 class="title-swagger">Liste des Projets Swagger</h1>
+    <h1 class="title-swagger">List  Project  Swagger</h1>
 
     {% if projets %}
       <div class="accordion" id="accordionProjects">
@@ -309,12 +309,12 @@
           <div class="px-4 py-3 d-flex justify-content-end gap-2 flex-wrap bg-white border-top">
             <a href="https://petstore.swagger.io/?url={{ p.swagger_url|urlencode }}" target="_blank" class="custom-btn btn-sm"><i class="fas fa-external-link-alt me-2"></i>Swagger</a>
             <a href="{% url 'scraping_data:rapport-swagger' %}?id={{ p.id }}" class="custom-btn btn-sm"><i class="fas fa-file-alt me-2"></i>Projet</a>
-            <a href="{% url 'scraping_data:tester-page' %}" class="custom-btn btn-sm"><i class="fas fa-vial me-2"></i>Tester</a>
+            <a href="{% url 'scraping_data:tester-page' %}" class="custom-btn btn-sm"><i class="fas fa-vial me-2"></i>Test </a>
             <a href="{% url 'scraping_data:project-parameters' p.id %}" class="custom-btn btn-sm secondary"><i class="fas fa-cog me-2"></i>Paramètres</a>
-            <a href="{% url 'scraping_data:edit-project' p.id %}" class="custom-btn btn-sm secondary"><i class="fas fa-edit me-2"></i>Modifier</a>
+            <a href="{% url 'scraping_data:edit-project' p.id %}" class="custom-btn btn-sm secondary"><i class="fas fa-edit me-2"></i>update</a>
             <form action="{% url 'scraping_data:delete-project' p.id %}" method="post" onsubmit="return confirm('Voulez-vous vraiment supprimer ce projet ?');" class="d-inline">
               {% csrf_token %}
-              <button type="submit" class="custom-btn btn-sm secondary"><i class="fas fa-trash me-2"></i>Supprimer</button>
+              <button type="submit" class="custom-btn btn-sm secondary"><i class="fas fa-trash me-2"></i>delete</button>
             </form>
           </div>
           <div id="collapse{{ p.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ p.id }}" data-bs-parent="#accordionProjects">

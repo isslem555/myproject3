@@ -27,7 +27,6 @@ urlpatterns = [
     path('tester/', views.tester_page, name='tester-page'),
     path('test_endpoint/', views.test_endpoint, name='test-endpoint'),
     path('download_history/', views.download_history, name='download-history'),
-    path('clear-tests/', views.clear_tests, name='clear-tests'),
     path('tester-tous/', views.tester_tous, name='tester-tous'),
 
     # --- Génération des tests automatiques ---

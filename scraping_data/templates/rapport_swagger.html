@@ -9,339 +9,26 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
 
   <style>
-    /* ====== BASE ====== */
+    /* ... ton CSS ici (celui que tu as fourni précédemment) ... */
     body {
-      background-color: #f9fafb;
-      color: #1f2937;
+      background-color: #f0f4ff;
+      color: #222f4a;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       padding: 0;
       min-height: 100vh;
       font-size: 16px;
       line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      transition: background-color 0.3s ease;
     }
-
+    /* Navbar */
     .navbar {
-      background-color: #ffffff;
-      box-shadow: 0 4px 12px rgb(0 0 0 / 0.07);
+      background-color: #fff;
+      box-shadow: 0 3px 10px rgb(0 0 0 / 0.08);
       padding: 1rem 2rem;
       font-weight: 600;
-      font-size: 1.1rem;
-      letter-spacing: 0.03em;
-    }
-
-    .navbar-brand, .nav-link {
-      color: #1f2937 !important;
-      user-select: none;
-      transition: color 0.3s ease, transform 0.2s ease;
-    }
-
-    .navbar-brand svg path {
-      fill: #1f2937;
-      transition: fill 0.3s ease;
-    }
-
-    .nav-link:hover {
-      color: #3b82f6 !important;
-      transform: translateY(-2px);
-    }
-
-    .brand-container {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-    }
-
-    /* ====== BOUTONS (style btn-tester) ====== */
-    .btn-tester {
-      background: linear-gradient(135deg, #1e40af, #1e1b4b);
-      border: none;
-      border-radius: 22px;
-      padding: 0.5rem 1.5rem;
-      color: #ffffff;
-      font-weight: 700;
-      font-size: 1rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      cursor: pointer;
-      user-select: none;
-      line-height: 1.2;
-      min-height: 40px;
-      white-space: nowrap;
-      justify-content: center;
-      letter-spacing: 0.045em;
-      box-shadow: 0 2px 7px rgb(30 64 175 / 0.45);
-      text-shadow: 0 1px 1px rgb(0 0 0 / 0.15);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn-tester i {
       font-size: 1.15rem;
-      line-height: 1;
     }
-
-    .btn-tester:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 7px 20px rgb(30 64 175 / 0.75);
-    }
-
-    .btn-tester::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      background: rgba(255, 255, 255, 0.25);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      transition: width 0.6s ease, height 0.6s ease;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .btn-tester:hover::after {
-      width: 220%;
-      height: 220%;
-    }
-
-    /* Couleurs spécifiques aux boutons */
-    .btn-tester-primary {
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-      box-shadow: 0 2px 7px rgb(59 130 246 / 0.45);
-      color: #fff;
-      text-shadow: 0 1px 1px rgb(0 0 0 / 0.15);
-    }
-    .btn-tester-primary:hover {
-      background: linear-gradient(135deg, #2563eb, #1e40af);
-      box-shadow: 0 7px 20px rgb(37 99 235 / 0.75);
-    }
-
-    .btn-tester-success {
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      box-shadow: 0 2px 7px rgb(34 197 94 / 0.45);
-      color: #fff;
-      text-shadow: 0 1px 1px rgb(0 0 0 / 0.15);
-    }
-    .btn-tester-success:hover {
-      background: linear-gradient(135deg, #16a34a, #15803d);
-      box-shadow: 0 7px 20px rgb(22 163 74 / 0.75);
-    }
-
-    .btn-tester-danger {
-      background: linear-gradient(135deg, #ef4444, #dc2626);
-      box-shadow: 0 2px 7px rgb(239 68 68 / 0.45);
-      color: #fff;
-      text-shadow: 0 1px 1px rgb(0 0 0 / 0.15);
-    }
-    .btn-tester-danger:hover {
-      background: linear-gradient(135deg, #dc2626, #b91c1c);
-      box-shadow: 0 7px 20px rgb(220 38 38 / 0.75);
-    }
-
-    /* ====== TABLEAU ====== */
-    .table-responsive {
-      margin-top: 2rem;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 6px 20px rgb(0 0 0 / 0.08);
-      background-color: #fff;
-      border: 1px solid #e2e8f0;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 1rem;
-      color: #1f2937;
-      letter-spacing: 0.02em;
-    }
-
-    thead th {
-      background-color: #f3f4f6;
-      padding: 18px 20px;
-      font-weight: 700;
-      border-bottom: 3px solid #cbd5e1;
-      user-select: none;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      text-align: left;
-    }
-
-    tbody tr {
-      border-bottom: 1px solid #e2e8f0;
-      transition: background-color 0.25s ease, transform 0.2s ease;
-    }
-
-    tbody tr:hover {
-      background-color: #fef3c7;
-      transform: translateY(-2px);
-    }
-
-    tbody td {
-      padding: 16px 20px;
-      vertical-align: middle;
-      font-weight: 500;
-      word-break: break-word;
-      max-width: 100%;
-      vertical-align: top;
-    }
-
-    /* Colonne Résumé et Paramètres améliorée */
-    tbody td:nth-child(3),
-    tbody td:nth-child(5) {
-      max-width: 320px;
-      white-space: normal !important;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      max-height: 9rem;  /* ~145px */
-      overflow-y: auto;
-      padding-right: 14px; /* espace pour scroll */
-      background: #f9fafb;
-      border-radius: 8px;
-      box-shadow: inset 0 0 6px rgb(0 0 0 / 0.04);
-      font-size: 0.95rem;
-      line-height: 1.4;
-    }
-
-    tbody td:nth-child(5) ul {
-      padding-left: 1.2rem;
-      margin: 0;
-      list-style: disc;
-      max-height: 100%;
-      overflow-y: auto;
-    }
-
-    tbody td code {
-      display: inline-block;
-      background-color: #eff6ff;
-      padding: 7px 13px;
-      border-radius: 8px;
-      font-family: 'Fira Code', monospace;
-      color: #1e40af;
-      font-weight: 600;
-      white-space: nowrap;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      max-width: 100%;
-    }
-
-    tbody td code:hover {
-      transform: scale(1.04);
-      box-shadow: 0 3px 10px rgba(59, 130, 246, 0.3);
-    }
-
-    td pre {
-      max-width: 360px;
-      white-space: pre-wrap;
-      word-break: break-word;
-      background-color: #e0e7ff;
-      border-radius: 10px;
-      padding: 0.7rem;
-      font-family: 'Fira Code', monospace;
-      color: #1e40af;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      user-select: all;
-      box-shadow: inset 0 0 10px rgb(59 130 246 / 0.15);
-    }
-
-    /* Badge méthode */
-    .method-badge {
-      font-weight: 700;
-      text-transform: uppercase;
-      font-size: 1rem;
-      padding: 0.55em 1.4em;
-      border-radius: 16px;
-      color: #ffffff;
-      user-select: none;
-      min-width: 90px;
-      text-align: center;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-      display: inline-block;
-      letter-spacing: 0.06em;
-      white-space: nowrap;
-      box-shadow: 0 1px 4px rgb(0 0 0 / 0.15);
-      text-shadow: 0 0 2px rgb(0 0 0 / 0.3);
-    }
-
-    .method-badge:hover {
-      transform: scale(1.08);
-      opacity: 0.85;
-    }
-
-    .method-get { background-color: #3b82f6; }
-    .method-post { background-color: #0284c7; }
-    .method-put { background-color: #f59e0b; color: #1f1f1f; }
-    .method-delete { background-color: #ef4444; min-width: 100px; }
-    .method-patch { background-color: #7c3aed; }
-    .method-head { background-color: #8b5cf6; }
-    .method-options { background-color: #6b7280; }
-
-    /* Footer */
-    footer {
-      margin-top: 3rem;
-      font-size: 1.05rem;
-      color: #6b7280;
-      text-align: center;
-      user-select: none;
-      letter-spacing: 0.03em;
-    }
-
-    footer a {
-      color: #3b82f6;
-      font-weight: 700;
-      text-decoration: none;
-      transition: color 0.3s ease, transform 0.2s ease;
-      letter-spacing: 0.03em;
-    }
-
-    footer a:hover {
-      color: #60a5fa;
-      transform: translateY(-2px);
-    }
-
-    a.btn-tester:focus, button.btn-tester:focus {
-      outline: 3px solid #2563eb;
-      outline-offset: 3px;
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 576px) {
-      .navbar {
-        padding: 0.75rem 1rem;
-        font-size: 1rem;
-      }
-      .brand-container {
-        justify-content: center;
-      }
-      .btn-tester {
-        width: 100%;
-        max-width: 100%;
-        justify-content: center;
-      }
-      tbody td, thead th {
-        font-size: 0.9rem;
-        padding: 14px 12px;
-      }
-      tbody td:nth-child(3), tbody td:nth-child(5) {
-        max-height: none;
-        max-width: none;
-        overflow-y: visible;
-        padding-right: 8px;
-      }
-      .method-badge {
-        min-width: 75px;
-        font-size: 0.85rem;
-        padding: 0.4em 0.9em;
-      }
-    }
+    /* ... (le reste de ton CSS complet) ... */
   </style>
 </head>
 <body>
@@ -349,9 +36,9 @@
 <!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg shadow-sm">
   <div class="container">
-    <div class="brand-container">
+    <div class="brand-container d-flex align-items-center gap-3 flex-wrap">
       <a class="navbar-brand d-flex align-items-center fw-bold" href="#">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#1f2937" stroke-width="2" class="me-2" viewBox="0 0 16 16" stroke-linejoin="round" stroke-linecap="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#222f4a" stroke-width="2" class="me-2" viewBox="0 0 16 16" stroke-linejoin="round" stroke-linecap="round">
           <path d="M8 0L3 16h10L8 0z"/>
         </svg>
         MyProject
@@ -375,30 +62,26 @@
 <div class="container py-5">
 
   <!-- Boutons principaux -->
-  <div class="text-center mb-3">
-    <a href="{% url 'scraping_data:generate_test' %}" class="btn-tester">
-      <i class="fas fa-gear me-2"></i> Générer test
+  <div class="actions-container text-center">
+    <a href="{% url 'scraping_data:generate_test' %}" class="btn-tester btn-tester-primary">
+      <i class="fas fa-gear"></i> Générer test
     </a>
-  </div>
-
-  <div class="text-center mb-3">
-    <a href="{% url 'scraping_data:tester-tous' %}" class="btn-tester">
-      <i class="fas fa-vials me-2"></i> Tester tous les endpoints
+    <a href="{% url 'scraping_data:tester-tous' %}" class="btn-tester btn-tester-primary">
+      <i class="fas fa-vials"></i> Tester tous les endpoints
     </a>
-  </div>
 
-  <div class="text-center mb-5">
-    <form method="post" action="{% url 'scraping_data:clean_tests' %}">
+    <form method="post" action="{% url 'scraping_data:clean_tests' %}" class="d-inline-block ms-2" id="clean-tests-form">
       {% csrf_token %}
+      <input type="hidden" name="project_id" value="{{ current_project.id }}">
       <button type="submit" class="btn-tester btn-tester-danger">
-        <i class="fas fa-trash-alt me-2"></i> Clean tests
+        <i class="fas fa-trash-alt"></i> Clean tests
       </button>
     </form>
   </div>
 
-  <div id="status"></div>
+  <div id="status" class="mt-4"></div>
 
-  <hr style="border-color: #cbd5e1;" />
+  <hr class="my-4 border-primary" />
 
   <div id="rapport-container" class="table-responsive" aria-describedby="rapport-description">
     {% if swagger_data %}
@@ -411,7 +94,7 @@
           <th scope="col">Méthode</th>
           <th scope="col">Endpoint complet</th>
           <th scope="col">Résumé</th>
-          <th scope="col">Tester</th>
+          <th scope="col" class="text-center">Tester</th>
           <th scope="col">Paramètres</th>
           <th scope="col">Commande cURL</th>
         </tr>
@@ -422,13 +105,11 @@
           <td>
             <span class="method-badge method-{{ ep.method|lower }}">{{ ep.method }}</span>
           </td>
-          <td>
-            <code>{{ ep.url_complete }}</code>
-          </td>
+          <td><code>{{ ep.url_complete }}</code></td>
           <td>{{ ep.summary|default:"(Pas de résumé)" }}</td>
-          <td>
-            <a href="{% url 'scraping_data:tester-page' %}" class="btn-tester" role="button" aria-label="Tester l'endpoint {{ ep.url_complete }}">
-              <i class="fas fa-vial me-1" aria-hidden="true"></i>Tester
+          <td class="text-center">
+            <a href="{% url 'scraping_data:tester-page' %}" class="btn-tester btn-tester-primary" aria-label="Tester l'endpoint {{ ep.url_complete }}">
+              <i class="fas fa-vial"></i> Tester
             </a>
           </td>
           <td>
@@ -462,6 +143,77 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const cleanTestsForm = document.getElementById("clean-tests-form");
+  const statusDiv = document.getElementById("status");
+
+  if (cleanTestsForm) {
+    cleanTestsForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const button = form.querySelector('button[type="submit"]');
+      button.disabled = true;
+
+      const url = form.action;
+      const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+      const formData = new FormData(form);
+
+      statusDiv.textContent = 'Suppression en cours...';
+      statusDiv.className = 'text-info fw-semibold';
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken,
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: formData,
+        credentials: 'same-origin' // Important pour CSRF
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.text().then(text => {
+            throw new Error('Erreur réseau: ' + response.status + ' ' + text);
+          });
+        }
+        return response.json();
+      })
+      .then(data => {
+        button.disabled = false;
+        if (data.success) {
+          statusDiv.textContent = 'Tests nettoyés avec succès !';
+          statusDiv.className = 'text-success fw-semibold';
+
+          // Colonnes à vider : endpoint complet (1), résumé (2), paramètres (4)
+          const tbody = document.querySelector('#rapport-container tbody');
+          if (tbody) {
+            tbody.querySelectorAll('tr').forEach(tr => {
+              [1, 2, 4].forEach(idx => {
+                if (tr.cells[idx]) {
+                  tr.cells[idx].innerHTML = '';
+                }
+              });
+            });
+          }
+        } else {
+          statusDiv.textContent = data.error || 'Erreur lors du nettoyage des tests.';
+          statusDiv.className = 'text-danger fw-semibold';
+        }
+      })
+      .catch(error => {
+        button.disabled = false;
+        console.error('Erreur:', error);
+        statusDiv.textContent = 'Erreur réseau lors de la suppression : ' + error.message;
+        statusDiv.className = 'text-danger fw-semibold';
+      });
+    });
+  }
+});
+</script>
 
 </body>
 </html>

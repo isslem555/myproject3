@@ -9,9 +9,9 @@
 <div class="container py-5">
 
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="text-primary">Headers for Project #{{ projet.id }}</h1>
+    <h1 class="text-primary">Headers param  #{{ projet.id }}</h1>
     <div>
-      <a href="{% url 'scraping_data:add-header' projet.id %}" class="btn btn-success me-2">➕ Add Header</a>
+      <a href="{% url 'scraping_data:add-header' projet.id %}" class="btn btn-success me-2">➕ Add </a>
     </div>
   </div>
 
@@ -42,7 +42,7 @@
             </td>
             <td><code>{{ h.value }}</code></td>
             <td>
-              <a href="{% url 'scraping_data:update-header' projet.id h.name %}" class="btn btn-sm btn-primary">Edit</a>
+              <a href="{% url 'scraping_data:update-header' projet.id h.name %}" class="btn btn-sm btn-primary">update</a>
             </td>
           </tr>
         {% endfor %}
