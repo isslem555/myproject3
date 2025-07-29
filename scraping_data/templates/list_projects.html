@@ -307,7 +307,7 @@
             </button>
           </h2>
           <div class="px-4 py-3 d-flex justify-content-end gap-2 flex-wrap bg-white border-top">
-            <a href="{% url 'scraping_data:rapport-swagger' %}?id={{ p.id }}" target="_blank" class="custom-btn btn-sm"><i class="fas fa-external-link-alt me-2"></i>Swagger</a>
+            <a href="https://petstore.swagger.io/?url={{ p.swagger_url|urlencode }}" target="_blank" class="custom-btn btn-sm"><i class="fas fa-external-link-alt me-2"></i>Swagger</a>
             <a href="{% url 'scraping_data:rapport-swagger' %}?id={{ p.id }}" class="custom-btn btn-sm"><i class="fas fa-file-alt me-2"></i>Projet</a>
             <a href="{% url 'scraping_data:tester-page' %}" class="custom-btn btn-sm"><i class="fas fa-vial me-2"></i>Tester</a>
             <a href="{% url 'scraping_data:project-parameters' p.id %}" class="custom-btn btn-sm secondary"><i class="fas fa-cog me-2"></i>Paramètres</a>
@@ -374,5 +374,50 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  {% if projets.has_other_pages %}
+    <nav class="d-flex justify-content-center mt-5">
+      <ul class="pagination pagination-lg">
+        {% if projets.has_previous %}
+          <li class="page-item">
+            <a class="page-link text-white" href="?page={{ projets.previous_page_number }}" aria-label="Page précédente"
+               style="background: var(--gradient); border: none;">
+              &laquo;
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <span class="page-link text-muted" style="background-color: var(--gray-light); border: none;">&laquo;</span>
+          </li>
+        {% endif %}
+
+        {% for num in projets.paginator.page_range %}
+          {% if projets.number == num %}
+            <li class="page-item active" aria-current="page">
+              <span class="page-link text-white" style="background-color: var(--primary); border-color: var(--primary);">{{ num }}</span>
+            </li>
+          {% else %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ num }}" style="color: var(--primary); border-color: var(--primary);">{{ num }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+
+        {% if projets.has_next %}
+          <li class="page-item">
+            <a class="page-link text-white" href="?page={{ projets.next_page_number }}" aria-label="Page suivante"
+               style="background: var(--gradient); border: none;">
+              &raquo;
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <span class="page-link text-muted" style="background-color: var(--gray-light); border: none;">&raquo;</span>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+
 </body>
 </html>

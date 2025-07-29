@@ -40,6 +40,12 @@ urlpatterns = [
     path('test-endpoint/', views.test_endpoint, name='test-endpoint'),
     path('tester-tous/', views.tester_tous_endpoints, name='tester-tous'),
     path('clean-tests/', views.clean_tests, name='clean_tests'),
+    path('project/<int:pk>/add-header/', views.add_header, name='add-header'),
+    path('projects/<int:pk>/parameters/', views.project_parameters, name='project-parameters'),
+    path('project/<int:pk>/update-header/<str:header_name>/', views.update_header, name='update-header'),
+
+
+
 ]
 
 

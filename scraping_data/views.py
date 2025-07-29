@@ -30,18 +30,25 @@ class SwaggerProjectForm(forms.ModelForm):
     class Meta:
         model = SwaggerProject
         fields = ['name', 'swagger_url']
+from django.shortcuts import render
+from urllib.parse import urlparse
+from django.core.paginator import Paginator
+from .models import SwaggerProject
 
-
-# --------- Vues CRUD Django classiques ---------
 def list_projects(request):
-    projets = SwaggerProject.objects.all().order_by('-created_at')
+    projets_all = SwaggerProject.objects.all().order_by('-created_at')
 
+    # Pagination : 5 projets par page
+    paginator = Paginator(projets_all, 5)
+    page_number = request.GET.get('page')
+    projets = paginator.get_page(page_number)
+
+    # Ajouter swagger_root_url à chaque projet de la page courante
     for p in projets:
         parsed_url = urlparse(p.swagger_url)
         p.swagger_root_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
 
     return render(request, 'list_projects.html', {'projets': projets})
-
 
 def add_project(request):
     if request.method == "POST":
@@ -72,8 +79,9 @@ def delete_project(request, pk):
     projet.delete()
     return redirect('scraping_data:list-projects')
 
+from django.shortcuts import render, get_object_or_404
+from .models import SwaggerProject
 
-# --------- Vue pour afficher uniquement les headers ---------
 def project_parameters(request, pk):
     projet = get_object_or_404(SwaggerProject, pk=pk)
     swagger_json = projet.swagger_json or []
@@ -90,7 +98,7 @@ def project_parameters(request, pk):
                         "name": name,
                         "type": param.get("type", ""),
                         "required": param.get("required", False),
-                        "example": param.get("value", ""),
+                        "value": param.get("value", ""),  # clé "value" pour l'exemple
                     })
                     seen_names.add(name)
 
@@ -617,3 +625,91 @@ def clean_tests(request):
     global test_history
     test_history.clear()
     return JsonResponse({"status": "succès", "message": "Historique des tests nettoyé."})
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import SwaggerProject
+from django.shortcuts import render, redirect, get_object_or_404
+
+# views.py
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import SwaggerProject
+
+def add_header(request, pk):
+    projet = get_object_or_404(SwaggerProject, id=pk)
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        value = request.POST.get('value')
+
+        if name and value:
+            swagger_json = projet.swagger_json or []
+
+            for ep in swagger_json:
+                params = ep.get('parameters', [])
+                exists = any(p.get('name') == name and p.get('in') == 'header' for p in params)
+                if not exists:
+                    params.append({
+                        "name": name,
+                        "in": "header",
+                        "type": "string",
+                        "required": False,
+                        "value": value
+                    })
+                    ep['parameters'] = params
+
+            projet.swagger_json = swagger_json
+            projet.save()
+
+        return redirect('scraping_data:project-parameters', pk=pk)
+
+    return render(request, 'add_header.html', {'project': projet})
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import SwaggerProject
+
+def update_header(request, pk, header_name):
+    project = get_object_or_404(SwaggerProject, id=pk)
+    swagger_json = project.swagger_json or []
+
+    # Chercher le header dans tous les endpoints
+    header = None
+    for ep in swagger_json:
+        params = ep.get('parameters', [])
+        for p in params:
+            if p.get('in') == 'header' and p.get('name') == header_name:
+                header = p
+                break
+        if header:
+            break
+
+    if not header:
+        # Si header non trouvé, on peut rediriger ou afficher une erreur
+        return redirect('scraping_data:project-parameters', pk=project.id)
+
+    if request.method == 'POST':
+        # Récupérer les données du formulaire
+        new_name = request.POST.get('name')
+        new_type = request.POST.get('type')
+        new_required = request.POST.get('required') == 'true'
+        new_value = request.POST.get('value')
+
+        # Mettre à jour le header dans swagger_json
+        header['name'] = new_name
+        header['type'] = new_type
+        header['required'] = new_required
+        header['value'] = new_value
+
+        # Sauvegarder la modification dans le projet
+        project.swagger_json = swagger_json
+        project.save()
+
+        # Rediriger vers la page des paramètres
+        return redirect('scraping_data:project-parameters', pk=project.id)
+
+    # GET: afficher le formulaire avec les valeurs actuelles
+    return render(request, 'update_header.html', {
+        'project': project,
+        'header': header,
+    })
