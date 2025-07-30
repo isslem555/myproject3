@@ -11,7 +11,6 @@ urlpatterns = [
 
     # --- Swagger : rapport et scraping ---
     path('rapport-swagger/', views.afficher_rapport_swagger, name='rapport-swagger'),
-
     path('rapport-swagger/pdf/', views.rapport_swagger_pdf, name='rapport-swagger-pdf'),
     path('swagger/endpoints/', views.SwaggerScrapeAPIView.as_view(), name='swagger-endpoints'),
     path('lancer-scraping/', views.lancer_scraping, name='lancer-scraping'),
@@ -22,12 +21,14 @@ urlpatterns = [
     path('projects/<int:pk>/edit/', views.edit_project, name='edit-project'),
     path('projects/<int:pk>/delete/', views.delete_project, name='delete-project'),
     path('projects/<int:pk>/parameters/', views.project_parameters, name='project-parameters'),
+    path('project/<int:pk>/add-header/', views.add_header, name='add-header'),
+    path('project/<int:pk>/update-header/<str:header_name>/', views.update_header, name='update-header'),
 
     # --- Test d'API ---
     path('tester/', views.tester_page, name='tester-page'),
-    path('test_endpoint/', views.test_endpoint, name='test-endpoint'),
+    path('test-endpoint/', views.test_endpoint, name='test-endpoint'),
     path('download_history/', views.download_history, name='download-history'),
-    path('tester-tous/', views.tester_tous, name='tester-tous'),
+    path('tester-tous/', views.tester_tous_endpoints, name='tester-tous'),
 
     # --- Génération des tests automatiques ---
     path('generate-test/', views.generate_test, name='generate_test'),
@@ -36,16 +37,5 @@ urlpatterns = [
 
     # --- Page générée après test ---
     path('generate-test-page/', views.generate_test_page, name='generate_test_page'),
-    path('test-endpoint/', views.test_endpoint, name='test-endpoint'),
-    path('tester-tous/', views.tester_tous_endpoints, name='tester-tous'),
     path('clean-tests/', views.clean_tests, name='clean_tests'),
-    path('project/<int:pk>/add-header/', views.add_header, name='add-header'),
-    path('projects/<int:pk>/parameters/', views.project_parameters, name='project-parameters'),
-    path('project/<int:pk>/update-header/<str:header_name>/', views.update_header, name='update-header'),
-
-
-
 ]
-
-
-

@@ -22,7 +22,10 @@ from rest_framework import status, serializers
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 
-from .models import SwaggerProject, SwaggerEndpoint  # adapte selon ton modèle
+from .models import SwaggerProject, Endpoint
+
+
+# adapte selon ton modèle
 
 
 # --------- Formulaire Django pour SwaggerProject ---------
@@ -297,36 +300,51 @@ def afficher_rapport_swagger(request):
     base_url = None
 
     if request.method == "POST":
-        # ta logique POST existante
+        # logique POST existante
         pass
 
     if project_id:
         projet = get_object_or_404(SwaggerProject, pk=project_id)
         swagger_data = projet.swagger_json or []
-        base_url = projet.swagger_url
+        base_url = projet.swagger_url.rstrip('/')
+
+        # Supprimer /v3/api-docs dans base_url si présent
+        if "/v3/api-docs" in base_url:
+            base_url = base_url.replace("/v3/api-docs", "")
     else:
-        # ta logique pour charger fichier JSON local
+        # logique alternative
         pass
 
-    method_counter = Counter(
-        ep.get("method", "UNKNOWN").upper() for ep in swagger_data
-    )
-    total_params = sum(
-        len(ep.get("parameters", [])) for ep in swagger_data
-    )
+    cleaned_endpoints = []
+    for ep in swagger_data:
+        endpoint_path = ep.get("endpoint", "")
+        if not base_url.endswith('/') and not endpoint_path.startswith('/'):
+            cleaned_url = f"{base_url}/{endpoint_path}"
+        else:
+            cleaned_url = f"{base_url}{endpoint_path}"
+
+        cleaned_ep = {
+            **ep,
+            "cleaned_url": cleaned_url
+        }
+        cleaned_endpoints.append(cleaned_ep)
+
+    # Statistiques
+    method_counter = Counter(ep.get("method", "UNKNOWN").upper() for ep in swagger_data)
+    total_params = sum(len(ep.get("parameters", [])) for ep in swagger_data)
     stats = {
         "methods": list(method_counter.items()),
         "avg_params": round(total_params / len(swagger_data), 2) if swagger_data else 0,
     }
 
     context = {
-        "swagger_data": swagger_data,
+        "swagger_data": cleaned_endpoints,  # <--- ici
         "stats": stats,
         "base_url": base_url,
     }
 
     if project_id:
-        context["current_project"] = projet  # Important !
+        context["current_project"] = projet
 
     return render(request, "rapport_swagger.html", context)
 
@@ -369,8 +387,35 @@ def rapport_swagger_pdf(request):
 # ======================= VUES TEST API ========================
 test_history = []
 
+from scraping_data.models import Endpoint
+
 def tester_page(request):
-    return render(request, "tester.html")
+    method = request.GET.get("method", "")
+    url = request.GET.get("url", "")
+
+    # On cherche l'endpoint correspondant
+    endpoint = Endpoint.objects.filter(method=method, cleaned_url=url).first()
+
+    if endpoint:
+        context = {
+            "default_method": endpoint.method,
+            "default_url": endpoint.cleaned_url,
+            "default_params": endpoint.query_params,       # JSON
+            "default_path_vars": endpoint.path_variables,  # JSON
+            "default_body": endpoint.request_body,         # JSON
+            "default_headers": endpoint.headers,           # JSON
+        }
+    else:
+        context = {
+            "default_method": method,
+            "default_url": url,
+            "default_params": '',
+            "default_path_vars": '',
+            "default_body": '',
+            "default_headers": '',
+        }
+
+    return render(request, "tester.html", context)
 
 
 @csrf_exempt
@@ -545,7 +590,9 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 from django.utils import timezone
-from scraping_data.models import SwaggerEndpoint  # à adapter selon ton modèle
+from scraping_data.models import Endpoint
+
+# à adapter selon ton modèle
 
 test_history = []
 

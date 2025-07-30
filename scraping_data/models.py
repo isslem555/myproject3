@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Product(models.Model):
     title = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -19,13 +20,20 @@ class SwaggerProject(models.Model):
         return self.name or f"Swagger Project {self.id}"
 
 
-class SwaggerEndpoint(models.Model):
+class Endpoint(models.Model):
     project = models.ForeignKey(SwaggerProject, on_delete=models.CASCADE, related_name='endpoints')
     method = models.CharField(max_length=10)
     endpoint = models.CharField(max_length=500)
     url_complete = models.URLField()
     summary = models.TextField(blank=True, null=True)
     parameters = models.JSONField(blank=True, null=True)
+
+    # ✅ Champs nécessaires pour le formulaire auto-rempli :
+    cleaned_url = models.CharField(max_length=1000, blank=True, null=True)
+    query_params = models.JSONField(blank=True, null=True)
+    path_variables = models.JSONField(blank=True, null=True)
+    request_body = models.JSONField(blank=True, null=True)
+    headers = models.JSONField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.method} {self.endpoint}"

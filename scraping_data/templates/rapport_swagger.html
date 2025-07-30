@@ -1,17 +1,12 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rapport Swagger dynamique</title>
+  <title>Dynamic Swagger Report</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <!-- FontAwesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
   <style>
     :root {
       --bg: #F1F5F9;
@@ -31,76 +26,93 @@
     body {
       background-color: var(--bg);
       color: var(--text-dark);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
       padding: 0;
       min-height: 100vh;
       font-size: 16px;
       line-height: 1.6;
-      overflow-x: hidden;
     }
 
-    /* Navbar style */
     .navbar {
       background-color: var(--bg-card);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-bottom: 1px solid var(--border);
       padding: 1rem 2rem;
-      font-weight: 600;
-      font-size: 1.15rem;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
     }
+
     .navbar-brand, .nav-link {
       color: var(--text-dark) !important;
+      font-weight: 500;
       transition: color 0.3s ease;
     }
+
+    .navbar-brand:hover, .nav-link:hover {
+      color: var(--primary) !important;
+    }
+
     .navbar-brand svg path {
       fill: var(--text-dark);
       transition: fill 0.3s ease;
     }
-    .nav-link:hover {
-      color: var(--primary) !important;
+
+    .navbar-brand:hover svg path {
+      fill: var(--primary);
     }
 
     .btn-tester {
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 1rem;
-      padding: 0.75rem 1.5rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      background: var(--gradient);
+      color: #FFFFFF !important;
+      padding: 0.6rem 1.5rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border: none;
+      text-decoration: none;
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      cursor: pointer;
-      border: none;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
-    .btn-tester i {
-      font-size: 1.1rem;
-    }
+
     .btn-tester:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      background: var(--primary-hover);
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(30, 64, 175, 0.3);
     }
-    .btn-tester-primary {
-      background: var(--gradient);
-      color: white;
-    }
+
     .btn-tester-danger {
-      background: linear-gradient(135deg, #dc3545, #a72833);
-      color: white;
+      background: var(--secondary);
     }
+
+    .btn-tester-danger:hover {
+      background: var(--secondary-hover);
+      box-shadow: 0 0 15px rgba(71, 85, 105, 0.3);
+    }
+
     .actions-container > * {
       margin-bottom: 1rem;
       margin-right: 0.5rem;
     }
 
-    .table-responsive {
+    .table-container {
       margin-top: 2.5rem;
-      border-radius: 12px;
+      border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow);
       background-color: var(--bg-card);
       border: 1px solid var(--border);
+      animation: fadeInUp 0.8s ease-in-out;
     }
+
+    .table-container:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.1);
+    }
+
     table {
       width: 100%;
       border-collapse: separate;
@@ -109,27 +121,29 @@
       color: var(--text-dark);
       table-layout: auto;
     }
+
     thead th {
-      background-color: #e9f0ff;
+      background-color: var(--gray-light);
       padding: 1.25rem 1.5rem;
-      font-weight: 700;
+      font-weight: 600;
       font-size: 0.9rem;
-      border-bottom: 2px solid var(--primary);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
+      border-bottom: 2px solid var(--border);
       text-align: left;
       color: var(--text-dark);
       position: sticky;
       top: 0;
       z-index: 10;
     }
+
     tbody tr {
       background-color: var(--bg-card);
-      transition: background-color 0.2s ease;
+      transition: background-color 0.3s ease;
     }
+
     tbody tr:hover {
-      background-color: #f5faff;
+      background-color: var(--gray-light);
     }
+
     tbody td {
       padding: 1.25rem 1.5rem;
       vertical-align: middle;
@@ -137,20 +151,19 @@
       border-bottom: 1px solid var(--border);
     }
 
-    /* Colonne URL */
     tbody td:nth-child(2) {
       max-width: 500px;
       overflow-x: auto;
       white-space: nowrap;
-      background-color: var(--bg);
+      background-color: var(--gray-light);
       border-radius: 6px;
       padding: 0.75rem 1rem;
       font-family: 'Fira Code', monospace;
-      color: #084fc1;
+      color: var(--primary);
     }
 
     .method-badge {
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
       font-size: 0.85rem;
       padding: 0.5rem 1.2rem;
@@ -159,37 +172,28 @@
       min-width: 80px;
       text-align: center;
       display: inline-block;
-      letter-spacing: 0.05em;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      transition: transform 0.2s ease;
+      transition: transform 0.3s ease;
     }
+
     .method-badge:hover {
       transform: scale(1.05);
     }
-    .method-get { background-color: var(--primary); }
-    .method-post { background-color: #0a58ca; }
+
+    .method-get { background-color: #28a745; }
+    .method-post { background-color: var(--primary); }
     .method-put { background-color: #ffc107; color: var(--text-dark); }
     .method-delete { background-color: #dc3545; min-width: 90px; }
     .method-patch { background-color: #6f42c1; }
     .method-head { background-color: #6610f2; }
-    .method-options { background-color: #6c757d; }
+    .method-options { background-color: var(--secondary); }
 
-    footer {
-      margin-top: 3rem;
-      font-size: 1rem;
-      color: var(--text-muted);
-      text-align: center;
-      padding-bottom: 2rem;
+    .text-muted {
+      color: var(--text-muted) !important;
     }
-    footer a {
-      color: var(--primary);
-      font-weight: 600;
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-    footer a:hover {
-      color: #084fc1;
-      text-decoration: underline;
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     @media (max-width: 576px) {
@@ -203,8 +207,8 @@
       .btn-tester {
         width: 100%;
         justify-content: center;
-        font-size: 0.9rem;
-        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
       }
       tbody td, thead th {
         font-size: 0.85rem;
@@ -229,7 +233,7 @@
   <div class="container">
     <div class="brand-container d-flex align-items-center gap-3 flex-wrap">
       <a class="navbar-brand d-flex align-items-center fw-bold" href="#">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="var(--text-dark)" stroke-width="2" class="me-2" viewBox="0 0 16 16" stroke-linejoin="round" stroke-linecap="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#1a2a44" stroke-width="2" class="me-2" viewBox="0 0 16 16" stroke-linejoin="round" stroke-linecap="round">
           <path d="M8 0L3 16h10L8 0z"/>
         </svg>
         MyProject
@@ -242,48 +246,47 @@
     <div class="collapse navbar-collapse" id="navbarMain">
       <ul class="navbar-nav ms-auto align-items-center">
         <li class="nav-item mx-2">
-          <a class="btn btn-outline-primary btn-sm px-4 rounded-pill fw-semibold" href="#">Get Started</a>
+          <a class="btn btn-outline-primary btn-sm px-4 rounded-pill fw-semibold" href="#" style="border-color: var(--primary); color: var(--primary);">Get Started</a>
         </li>
       </ul>
     </div>
   </div>
 </nav>
 
-<!-- CONTENU -->
+<!-- CONTENT -->
 <div class="container py-5">
-
-  <!-- Boutons principaux -->
+  <!-- Main Buttons -->
   <div class="actions-container text-center">
-    <a href="{% url 'scraping_data:generate_test' %}" class="btn-tester btn-tester-primary" role="button">
-      <i class="fas fa-gear"></i> Générer test
+    <a href="{% url 'scraping_data:generate_test' %}" class="btn-tester">
+      <i class="fas fa-gear"></i> Generate Test
     </a>
-    <a href="{% url 'scraping_data:tester-tous' %}" class="btn-tester btn-tester-primary" role="button">
-      <i class="fas fa-vials"></i> Tester tous les endpoints
+    <a href="{% url 'scraping_data:tester-tous' %}" class="btn-tester">
+      <i class="fas fa-vials"></i> Test All Endpoints
     </a>
     <form method="post" action="{% url 'scraping_data:clean_tests' %}" class="d-inline-block ms-2" id="clean-tests-form">
       {% csrf_token %}
       <input type="hidden" name="project_id" value="{{ current_project.id }}">
       <button type="submit" class="btn-tester btn-tester-danger">
-        <i class="fas fa-trash-alt"></i> Clean tests
+        <i class="fas fa-trash-alt"></i> Clear Tests
       </button>
     </form>
   </div>
 
-  <div id="status" class="mt-4"></div>
+  <div id="status" class="mt-4 text-center"></div>
 
-  <hr class="my-4 border-primary" />
+  <hr class="my-4" style="border-color: var(--border);" />
 
-  <div id="rapport-container" class="table-responsive" aria-describedby="rapport-description">
+  <div id="rapport-container" class="table-container" aria-describedby="rapport-description">
     {% if swagger_data %}
     <table class="table table-hover align-middle">
       <caption id="rapport-description" class="visually-hidden">
-        Liste des endpoints Swagger extraits.
+        List of extracted Swagger endpoints.
       </caption>
       <thead>
         <tr>
-          <th scope="col" style="width: 15%;">Méthode</th>
-          <th scope="col" style="width: 65%;">Endpoint complet</th>
-          <th scope="col" style="width: 20%;" class="text-center">Tester</th>
+          <th scope="col" style="width: 15%;">Method</th>
+          <th scope="col" style="width: 65%;">Full Endpoint</th>
+          <th scope="col" style="width: 20%;" class="text-center">Test</th>
         </tr>
       </thead>
       <tbody>
@@ -292,27 +295,31 @@
           <td>
             <span class="method-badge method-{{ ep.method|lower }}">{{ ep.method }}</span>
           </td>
-          <td><code>{{ ep.url_complete }}</code></td>
-          <td class="text-center">
-            <a href="{% url 'scraping_data:tester-page' %}" class="btn-tester btn-tester-primary" aria-label="Tester l'endpoint {{ ep.url_complete }}">
-              <i class="fas fa-vial"></i> Tester
+          <td>
+            <a href="{{ ep.cleaned_url }}" target="_blank">
+              {{ ep.cleaned_url }}
             </a>
+          </td>
+
+          <td class="text-center">
+            <a href="{% url 'scraping_data:tester-page' %}?method={{ ep.method }}&url={{ ep.cleaned_url|urlencode }}"
+
+   class="btn-tester"
+   aria-label="Test the endpoint {{ ep.cleaned_url }}">
+   <i class="fas fa-vial"></i> Test
+</a>
           </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
     {% else %}
-    <p class="text-center fs-5 text-muted mt-5">
-      Aucun rapport Swagger disponible. Lancez le scraping via la page "Générer test".
-    </p>
+    <div class="text-center py-5">
+      <p class="text-muted fs-5">No Swagger report available. Start scraping from the "Generate Test" page.</p>
+    </div>
     {% endif %}
   </div>
 </div>
-
-<footer>
-  &copy; {{ current_year|default:"2025" }} MyProject — Tous droits réservés.
-</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -333,7 +340,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
       const formData = new FormData(form);
 
-      statusDiv.textContent = 'Suppression en cours...';
+      statusDiv.textContent = 'Clearing in progress...';
       statusDiv.className = 'text-info fw-semibold';
 
       fetch(url, {
@@ -349,7 +356,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .then(response => {
         if (!response.ok) {
           return response.text().then(text => {
-            throw new Error('Erreur réseau: ' + response.status + ' ' + text);
+            throw new Error('Network error: ' + response.status + ' ' + text);
           });
         }
         return response.json();
@@ -357,21 +364,21 @@ document.addEventListener("DOMContentLoaded", function () {
       .then(data => {
         button.disabled = false;
         if (data.success) {
-          statusDiv.textContent = 'Tests nettoyés avec succès !';
+          statusDiv.textContent = 'Tests cleared successfully!';
           statusDiv.className = 'text-success fw-semibold';
           const tbody = document.querySelector('#rapport-container tbody');
           if (tbody) {
             tbody.innerHTML = '';
           }
         } else {
-          statusDiv.textContent = data.error || 'Erreur lors du nettoyage des tests.';
+          statusDiv.textContent = data.error || 'Error clearing tests.';
           statusDiv.className = 'text-danger fw-semibold';
         }
       })
       .catch(error => {
         button.disabled = false;
-        console.error('Erreur:', error);
-        statusDiv.textContent = 'Erreur réseau lors de la suppression : ' + error.message;
+        console.error('Error:', error);
+        statusDiv.textContent = 'Network error during clearing: ' + error.message;
         statusDiv.className = 'text-danger fw-semibold';
       });
     });

@@ -4,116 +4,178 @@
   <meta charset="UTF-8" />
   <title>{{ title }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
+    :root {
+      --bg: #F1F5F9;
+      --bg-card: #FFFFFF;
+      --text-dark: #111827;
+      --text-muted: #6B7280;
+      --border: #D1D5DB;
+      --primary: #1E40AF;
+      --primary-hover: #1E3A8A;
+      --secondary: #475569;
+      --secondary-hover: #334155;
+      --gray-light: #E5E7EB;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+      --gradient: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%);
+    }
+
     body {
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      background-color: var(--bg);
+      color: var(--text-dark);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
+      margin: 0;
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #fff;
-      margin: 0;
       padding: 20px;
     }
+
     .form-container {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(15px);
-      border-radius: 15px;
+      background-color: var(--bg-card);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
       padding: 40px 30px;
       width: 100%;
       max-width: 480px;
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      animation: fadeInUp 0.8s ease-in-out;
       transition: transform 0.3s ease;
     }
+
     .form-container:hover {
-      transform: scale(1.03);
-      box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.6);
+      transform: translateY(-4px);
+      box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.1);
     }
+
     h2 {
-      margin-bottom: 1.5rem;
-      text-align: center;
+      font-size: 2rem;
       font-weight: 700;
-      text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      text-align: center;
+      color: var(--text-dark);
+      margin-bottom: 1.5rem;
+      position: relative;
     }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      width: 60px;
+      height: 4px;
+      background: var(--gradient);
+      transform: translateX(-50%);
+      border-radius: 2px;
+    }
+
     form label {
       font-weight: 600;
-      color: #f0e9ff;
+      color: var(--text-dark);
     }
-    input.form-control, textarea.form-control {
-      background: rgba(255, 255, 255, 0.2);
-      border: none;
-      color: #fff;
-      box-shadow: none;
-      transition: background-color 0.3s ease;
+
+    input.form-control,
+    textarea.form-control,
+    select.form-control {
+      background: var(--gray-light);
+      border: 1px solid var(--border);
+      color: var(--text-dark);
+      border-radius: 6px;
+      transition: all 0.3s ease;
     }
-    input.form-control:focus, textarea.form-control:focus {
-      background: rgba(255, 255, 255, 0.35);
-      color: #222;
+
+    input.form-control:focus,
+    textarea.form-control:focus,
+    select.form-control:focus {
+      background: #FFFFFF;
+      border-color: var(--primary);
+      box-shadow: 0 0 8px rgba(30, 64, 175, 0.3);
       outline: none;
-      box-shadow: 0 0 8px #9b59b6;
-      border-radius: 5px;
     }
-    .btn-primary {
-      background: #9b59b6;
+
+    .custom-btn {
+      background: var(--gradient);
+      color: #FFFFFF !important;
+      padding: 0.6rem 1.5rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
       border: none;
-      font-weight: 600;
-      padding: 10px 25px;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 4px 15px rgba(155, 89, 182, 0.4);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
-    .btn-primary:hover {
-      background: #8e44ad;
-      box-shadow: 0 6px 20px rgba(142, 68, 173, 0.7);
+
+    .custom-btn:hover {
+      background: var(--primary-hover);
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(30, 64, 175, 0.3);
     }
-    .btn-secondary {
-      background: transparent;
-      border: 2px solid #fff;
-      color: #fff;
-      font-weight: 600;
-      padding: 10px 25px;
-      transition: background-color 0.3s ease, color 0.3s ease;
+
+    .custom-btn.secondary {
+      background: var(--secondary);
     }
-    .btn-secondary:hover {
-      background: #fff;
-      color: #8e44ad;
-      border-color: #8e44ad;
+
+    .custom-btn.secondary:hover {
+      background: var(--secondary-hover);
+      box-shadow: 0 0 15px rgba(71, 85, 105, 0.3);
     }
+
     .back-to-list {
       display: block;
       text-align: center;
       margin-top: 30px;
-      color: #ffffff;
+      color: var(--primary);
       font-weight: 600;
       text-decoration: none;
       transition: color 0.3s ease;
     }
+
     .back-to-list:hover {
-      color: #f1c40f;
+      color: var(--primary-hover);
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .form-container {
+        padding: 20px;
+      }
+      h2 {
+        font-size: 1.75rem;
+      }
+      .custom-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+      }
     }
   </style>
 </head>
 <body>
-
   <div class="form-container shadow">
     <h2>{{ title }}</h2>
     <form method="post" novalidate>
       {% csrf_token %}
       {{ form.as_p }}
       <div class="d-flex justify-content-center gap-3 mt-4">
-        <button type="submit" class="btn btn-primary">Valider</button>
-        <a href="{% url 'scraping_data:list-projects' %}" class="btn btn-secondary">Annuler</a>
+        <button type="submit" class="custom-btn"><i class="fas fa-check me-2"></i>Valider</button>
+        <a href="{% url 'scraping_data:list-projects' %}" class="custom-btn secondary"><i class="fas fa-times me-2"></i>Annuler</a>
       </div>
     </form>
 
-    <!-- Bouton retour en bas -->
-    <a href="{% url 'scraping_data:list-projects' %}" class="back-to-list">← Retour à la liste des projets Swagger</a>
+    <a href="{% url 'scraping_data:list-projects' %}" class="back-to-list"><i class="fas fa-arrow-left me-2"></i>Retour à la liste des projets Swagger</a>
   </div>
 
-<!-- Bootstrap JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

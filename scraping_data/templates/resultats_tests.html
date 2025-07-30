@@ -1,30 +1,30 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Résultats des tests Swagger</title>
+  <title>Swagger Test Results</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 </head>
 <body>
   <div class="container py-5">
-    <h1>Résultats des tests Swagger</h1>
+    <h1>Swagger Test Results</h1>
 
     {% if results %}
       <ul class="list-group">
         {% for test in results %}
           <li class="list-group-item">
             Endpoint: <strong>{{ test.endpoint }}</strong><br />
-            Statut: <span class="badge {% if test.status == 'passed' %}bg-success{% else %}bg-danger{% endif %}">{{ test.status }}</span>
+            Status: <span class="badge {% if test.status == 'passed' %}bg-success{% else %}bg-danger{% endif %}">{{ test.status }}</span>
             <br />
-            <small>Détails: {{ test.details }}</small>
+            <small>Details: {{ test.details }}</small>
           </li>
         {% endfor %}
       </ul>
     {% else %}
-      <p>Aucun résultat de test disponible.</p>
+      <p>No test results available.</p>
     {% endif %}
 
-    <a href="{% url 'scraping_data:rapport-swagger' %}" class="btn btn-secondary mt-4">Retour au rapport Swagger</a>
+    <a href="{% url 'scraping_data:rapport-swagger' %}" class="btn btn-secondary mt-4">Back to Swagger Report</a>
   </div>
 </body>
 </html>

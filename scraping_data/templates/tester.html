@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Outil de Test d'API</title>
+    <title>API Testing Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Style personnalisé pour gérer le débordement */
         .response-table {
             max-width: 100%;
             overflow-x: auto;
@@ -32,54 +31,56 @@
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold mb-4">Outil de Test d'API</h1>
+        <h1 class="text-2xl font-bold mb-4">API Testing Tool</h1>
         <div class="bg-white p-6 rounded shadow">
-            <form id="apiForm" class="space-y-4">
+            <form id="apiForm" method="POST" class="space-y-4">
+                {% csrf_token %}
                 <div>
-                    <label for="method" class="block text-sm font-medium">Méthode HTTP</label>
-                    <select id="method" class="mt-1 block w-full border rounded p-2">
-                        <option value="GET">GET</option>
-                        <option value="POST">POST</option>
-                        <option value="PUT">PUT</option>
-                        <option value="DELETE">DELETE</option>
+                    <label for="method" class="block text-sm font-medium">HTTP Method</label>
+                    <select id="method" name="method" class="mt-1 block w-full border rounded p-2">
+                        <option value="GET" {% if default_method == "GET" %}selected{% endif %}>GET</option>
+                        <option value="POST" {% if default_method == "POST" %}selected{% endif %}>POST</option>
+                        <option value="PUT" {% if default_method == "PUT" %}selected{% endif %}>PUT</option>
+                        <option value="DELETE" {% if default_method == "DELETE" %}selected{% endif %}>DELETE</option>
                     </select>
                 </div>
                 <div>
-                    <label for="url" class="block text-sm font-medium">URL de l'endpoint</label>
-                    <input id="url" type="text" class="mt-1 block w-full border rounded p-2" placeholder="https://api.example.com/{id}/data">
+                    <label for="url" class="block text-sm font-medium">Endpoint URL</label>
+                    <input id="url" name="url" type="text" class="mt-1 block w-full border rounded p-2"
+                           placeholder="https://api.example.com/{id}/data"
+                           value="{{ default_url }}">
                 </div>
                 <div>
-                    <label for="params" class="block text-sm font-medium">Paramètres de requête (JSON)</label>
-                    <textarea id="params" class="mt-1 block w-full border rounded p-2" placeholder='{"key": "value"}'></textarea>
+                    <label for="params" class="block text-sm font-medium">Query Parameters (JSON)</label>
+                    <textarea id="params" name="params" class="mt-1 block w-full border rounded p-2"
+                              placeholder='{"key": "value"}'>{{ default_params }}</textarea>
                 </div>
                 <div>
-                    <label for="path_vars" class="block text-sm font-medium">Variables de chemin (JSON)</label>
-                    <textarea id="path_vars" class="mt-1 block w-full border rounded p-2" placeholder='{"id": "123"}'></textarea>
+                    <label for="path_vars" class="block text-sm font-medium">Path Variables (JSON)</label>
+                    <textarea id="path_vars" name="path_vars" class="mt-1 block w-full border rounded p-2"
+                              placeholder='{"id": "123"}'>{{ default_path_vars }}</textarea>
                 </div>
                 <div>
-                    <label for="body" class="block text-sm font-medium">Corps de la requête (JSON)</label>
-                    <textarea id="body" class="mt-1 block w-full border rounded p-2" placeholder='{"title": "foo", "body": "bar"}'></textarea>
+                    <label for="body" class="block text-sm font-medium">Request Body (JSON)</label>
+                    <textarea id="body" name="body" class="mt-1 block w-full border rounded p-2"
+                              placeholder='{"title": "foo", "body": "bar"}'>{{ default_body }}</textarea>
                 </div>
                 <div>
-                    <label for="headers" class="block text-sm font-medium">En-têtes HTTP (JSON)</label>
-                    <textarea id="headers" class="mt-1 block w-full border rounded p-2" placeholder='{"Content-Type": "application/json"}'></textarea>
+                    <label for="headers" class="block text-sm font-medium">HTTP Headers (JSON)</label>
+                    <textarea id="headers" name="headers" class="mt-1 block w-full border rounded p-2"
+                              placeholder='{"Content-Type": "application/json"}'>{{ default_headers }}</textarea>
                 </div>
 
-                <!-- ✅ Section des boutons -->
                 <div class="flex space-x-4">
-                    <button type="button" onclick="testEndpoint()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Test</button>
-                    <!-- ✅ Lien vers l’historique -->
-                    <a href="{% url 'scraping_data:download-history' %}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Check Details</a>
-                    <!-- ✅ Nouveau bouton pour générer le rapport pytest -->
-                    <a href="{% url 'scraping_data:generate-report' %}" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">Rapport</a>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Test</button>
+                    <a href="{% url 'scraping_data:download-history' %}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">View History</a>
+                    <a href="{% url 'scraping_data:generate-report' %}" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">Pytest Report</a>
                 </div>
             </form>
 
-            <div id="response" class="mt-4 p-4 border rounded max-w-full overflow-x-auto">
-                <!-- La réponse sera insérée ici -->
-            </div>
+            <div id="response" class="mt-4 p-4 border rounded max-w-full overflow-x-auto"></div>
             <div id="imageContainer" class="mt-4 hidden">
-                <h2 class="text-lg font-medium">Image APOD</h2>
+                <h2 class="text-lg font-medium">APOD Image</h2>
                 <img id="apodImage" src="" alt="APOD Image" class="max-w-full h-auto rounded">
             </div>
         </div>
@@ -97,12 +98,12 @@
                 body = JSON.parse(document.getElementById('body').value || '{}');
                 headers = JSON.parse(document.getElementById('headers').value || '{}');
             } catch (e) {
-                alert('JSON invalide dans les paramètres, variables de chemin, corps ou en-têtes');
+                alert('Invalid JSON in parameters, path variables, body, or headers');
                 return;
             }
 
             if (url.includes('api.nasa.gov') && !params.api_key) {
-                alert('Clé API NASA (api_key) requise pour cet endpoint');
+                alert('NASA API key (api_key) required for this endpoint');
                 return;
             }
 
@@ -111,8 +112,8 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ method, url, params, path_vars, body, headers })
             });
-            const result = await response.json();
 
+            const result = await response.json();
             const responseDiv = document.getElementById('response');
             const imageContainer = document.getElementById('imageContainer');
             const apodImage = document.getElementById('apodImage');
@@ -120,14 +121,14 @@
             if (result.status === 'success') {
                 let requestBodyHtml = '';
                 if (result.request_body && Object.keys(result.request_body).length > 0) {
-                    requestBodyHtml = `<p><strong>Corps envoyé:</strong></p><pre class="response-pre">${JSON.stringify(result.request_body, null, 2)}</pre>`;
+                    requestBodyHtml = `<p><strong>Request Body Sent:</strong></p><pre class="response-pre">${JSON.stringify(result.request_body, null, 2)}</pre>`;
                 }
 
-                let responseHtml = `<p><strong>Statut:</strong> ${result.status_code}</p>`;
+                let responseHtml = `<p><strong>Status:</strong> ${result.status_code}</p>`;
                 try {
                     const responseData = JSON.parse(result.response);
                     responseHtml += '<div class="response-table"><table class="w-full border-collapse border border-gray-300 mt-2">';
-                    responseHtml += '<tr><th class="border border-gray-300 p-2">Clé</th><th class="border border-gray-300 p-2">Valeur</th></tr>';
+                    responseHtml += '<tr><th class="border border-gray-300 p-2">Key</th><th class="border border-gray-300 p-2">Value</th></tr>';
                     for (const [key, value] of Object.entries(responseData)) {
                         responseHtml += `<tr><td class="border border-gray-300 p-2">${key}</td><td class="border border-gray-300 p-2">${JSON.stringify(value)}</td></tr>`;
                     }
@@ -150,7 +151,7 @@
                     imageContainer.classList.add('hidden');
                 }
             } else {
-                responseDiv.innerHTML = `<p><strong>Erreur:</strong> ${result.error}</p>`;
+                responseDiv.innerHTML = `<p><strong>Error:</strong> ${result.error}</p>`;
                 imageContainer.classList.add('hidden');
             }
         }
