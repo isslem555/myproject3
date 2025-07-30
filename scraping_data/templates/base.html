@@ -1,46 +1,172 @@
-<!-- scraping_data/templates/scraping_data/base.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>{% block title %}Scraping Project{% endblock %}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <meta charset="UTF-8" />
+  <title>{% block title %}MyProject{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- FontAwesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #0F172A;
+      --bg-card: #1E293B;
+      --text: #E2E8F0;
+      --text-muted: #94A3B8;
+      --primary: #3B82F6;
+      --primary-dark: #1D4ED8;
+      --border: #334155;
+      --shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      overflow-x: hidden;
+      animation: fadeIn 0.8s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .navbar {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 1rem 0.5rem;
+    }
+
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--text);
+    }
+
+    .navbar-brand:hover {
+      color: var(--primary);
+    }
+
+    .nav-link {
+      color: var(--text-muted) !important;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .nav-link:hover {
+      color: var(--primary) !important;
+      transform: translateY(-2px);
+    }
+
+    .custom-btn {
+      background-color: var(--primary);
+      color: white !important;
+      padding: 0.5rem 1.2rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .custom-btn:hover {
+      background-color: var(--primary-dark);
+      transform: scale(1.05);
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+    }
+
+    .container {
+      max-width: 1200px;
+    }
+
+    main {
+      padding-top: 4rem;
+      padding-bottom: 4rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border);
+    }
+
+    table {
+      background-color: var(--bg-card);
+    }
+
+    thead th {
+      background-color: #1E293B;
+      color: var(--text);
+    }
+
+    tbody td {
+      color: var(--text-muted);
+    }
+
+    code {
+      color: var(--primary);
+    }
+
+    @media (max-width: 768px) {
+      .navbar-brand {
+        font-size: 1.2rem;
+      }
+      .nav-link {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+
+  {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Scraping Project</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
 
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'scraping_data:list-projects' %}">Liste des Projets</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'scraping_data:add-project' %}">Ajouter un Projet</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'scraping_data:rapport-swagger-html' %}">Rapport Swagger</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'scraping_data:product-list' %}">Produits</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- CONTENT -->
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg">
     <div class="container">
-        {% block content %}
-        {% endblock %}
+      <a class="navbar-brand" href="{% url 'home' %}">MyProject</a>
+      <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="{% url 'scraping_data:list-projects' %}">Projects</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'scraping_data:rapport-swagger' %}">Rapport</a></li>
+        </ul>
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="custom-btn" href="#">Get Started</a>
+          </li>
+        </ul>
+      </div>
     </div>
+  </nav>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Main content -->
+  <main class="container">
+    {% block content %}
+    <!-- Contenu spécifique à chaque page ici -->
+    {% endblock %}
+  </main>
+
+  <footer>
+    &copy; {{ current_year|default:"2025" }} MyProject — Tous droits réservés.
+  </footer>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  {% block extra_js %}{% endblock %}
 </body>
 </html>

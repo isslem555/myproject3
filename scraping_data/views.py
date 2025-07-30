@@ -587,9 +587,9 @@ def tester_tous_endpoints(request):
 
     return render(request, 'swagger/test_results.html', {'results': results})
 
-
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from .models import SwaggerProject  # Assure-toi que le modèle est bien importé
 
 @csrf_exempt
 def clean_tests(request):
@@ -598,8 +598,15 @@ def clean_tests(request):
         if not project_id:
             return JsonResponse({'success': False, 'error': 'Project ID manquant.'}, status=400)
 
-        # Aucun accès à la base de données ici.
-        return JsonResponse({'success': True})
+        try:
+            project = SwaggerProject.objects.get(id=project_id)
+        except SwaggerProject.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Projet introuvable.'}, status=404)
+
+        # Suppression réelle des endpoints liés à ce projet
+        nb_deleted, _ = project.endpoints.all().delete()
+
+        return JsonResponse({'success': True, 'deleted_count': nb_deleted})
 
     return JsonResponse({'success': False, 'error': 'Méthode non autorisée.'}, status=405)
 
