@@ -1,210 +1,320 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rapport Swagger dynamique</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-{% block title %}Rapport Swagger dynamique{% endblock %}
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- FontAwesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-{% block extra_head %}
-<style>
-  /* Styles spécifiques au rapport Swagger */
-  .btn-tester {
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 1rem;
-    padding: 0.75rem 1.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    border: none;
-  }
-  .btn-tester i {
-    font-size: 1.1rem;
-  }
-  .btn-tester:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-  }
-  .btn-tester-primary {
-    background: linear-gradient(135deg, #0d6efd, #084fc1);
-    color: white;
-  }
-  .btn-tester-danger {
-    background: linear-gradient(135deg, #dc3545, #a72833);
-    color: white;
-  }
-  .actions-container > * {
-    margin-bottom: 1rem;
-    margin-right: 0.5rem;
-  }
+  <style>
+    :root {
+      --bg: #F1F5F9;
+      --bg-card: #FFFFFF;
+      --text-dark: #111827;
+      --text-muted: #6B7280;
+      --border: #D1D5DB;
+      --primary: #1E40AF;
+      --primary-hover: #1E3A8A;
+      --secondary: #475569;
+      --secondary-hover: #334155;
+      --gray-light: #E5E7EB;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+      --gradient: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%);
+    }
 
-  .table-responsive {
-    margin-top: 2.5rem;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    background-color: #fff;
-    border: 1px solid #e9ecef;
-  }
-  table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    font-size: 0.95rem;
-    color: #1a2a44;
-    table-layout: auto;
-  }
-  thead th {
-    background-color: #e9f0ff;
-    padding: 1.25rem 1.5rem;
-    font-weight: 700;
-    font-size: 0.9rem;
-    border-bottom: 2px solid #0d6efd;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    text-align: left;
-    color: #1a2a44;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  tbody tr {
-    background-color: #fff;
-    transition: background-color 0.2s ease;
-  }
-  tbody tr:hover {
-    background-color: #f5faff;
-  }
-  tbody td {
-    padding: 1.25rem 1.5rem;
-    vertical-align: middle;
-    font-weight: 500;
-    border-bottom: 1px solid #e9ecef;
-  }
+    body {
+      background-color: var(--bg);
+      color: var(--text-dark);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
 
-  /* Colonne URL */
-  tbody td:nth-child(2) {
-    max-width: 500px;
-    overflow-x: auto;
-    white-space: nowrap;
-    background-color: #f8f9fa;
-    border-radius: 6px;
-    padding: 0.75rem 1rem;
-    font-family: 'Fira Code', monospace;
-    color: #084fc1;
-  }
-
-  .method-badge {
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    padding: 0.5rem 1.2rem;
-    border-radius: 20px;
-    color: #fff;
-    min-width: 80px;
-    text-align: center;
-    display: inline-block;
-    letter-spacing: 0.05em;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    transition: transform 0.2s ease;
-  }
-  .method-badge:hover {
-    transform: scale(1.05);
-  }
-  .method-get { background-color: #0d6efd; }
-  .method-post { background-color: #0a58ca; }
-  .method-put { background-color: #ffc107; color: #1a2a44; }
-  .method-delete { background-color: #dc3545; min-width: 90px; }
-  .method-patch { background-color: #6f42c1; }
-  .method-head { background-color: #6610f2; }
-  .method-options { background-color: #6c757d; }
-
-  @media (max-width: 576px) {
+    /* Navbar style */
     .navbar {
-      padding: 0.75rem 1rem;
-      font-size: 1rem;
+      background-color: var(--bg-card);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 1rem 2rem;
+      font-weight: 600;
+      font-size: 1.15rem;
     }
+    .navbar-brand, .nav-link {
+      color: var(--text-dark) !important;
+      transition: color 0.3s ease;
+    }
+    .navbar-brand svg path {
+      fill: var(--text-dark);
+      transition: fill 0.3s ease;
+    }
+    .nav-link:hover {
+      color: var(--primary) !important;
+    }
+
     .btn-tester {
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 0.75rem 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-tester i {
+      font-size: 1.1rem;
+    }
+    .btn-tester:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+    .btn-tester-primary {
+      background: var(--gradient);
+      color: white;
+    }
+    .btn-tester-danger {
+      background: linear-gradient(135deg, #dc3545, #a72833);
+      color: white;
+    }
+    .actions-container > * {
+      margin-bottom: 1rem;
+      margin-right: 0.5rem;
+    }
+
+    .table-responsive {
+      margin-top: 2.5rem;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+    }
+    table {
       width: 100%;
-      justify-content: center;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.95rem;
+      color: var(--text-dark);
+      table-layout: auto;
+    }
+    thead th {
+      background-color: #e9f0ff;
+      padding: 1.25rem 1.5rem;
+      font-weight: 700;
       font-size: 0.9rem;
-      padding: 0.6rem 1rem;
+      border-bottom: 2px solid var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      text-align: left;
+      color: var(--text-dark);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
-    tbody td, thead th {
-      font-size: 0.85rem;
-      padding: 0.75rem 1rem;
+    tbody tr {
+      background-color: var(--bg-card);
+      transition: background-color 0.2s ease;
     }
+    tbody tr:hover {
+      background-color: #f5faff;
+    }
+    tbody td {
+      padding: 1.25rem 1.5rem;
+      vertical-align: middle;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Colonne URL */
     tbody td:nth-child(2) {
-      max-width: 100%;
+      max-width: 500px;
       overflow-x: auto;
+      white-space: nowrap;
+      background-color: var(--bg);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-family: 'Fira Code', monospace;
+      color: #084fc1;
     }
+
     .method-badge {
-      min-width: 70px;
-      font-size: 0.8rem;
-      padding: 0.4rem 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      padding: 0.5rem 1.2rem;
+      border-radius: 20px;
+      color: #fff;
+      min-width: 80px;
+      text-align: center;
+      display: inline-block;
+      letter-spacing: 0.05em;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      transition: transform 0.2s ease;
     }
-  }
-</style>
-{% endblock %}
+    .method-badge:hover {
+      transform: scale(1.05);
+    }
+    .method-get { background-color: var(--primary); }
+    .method-post { background-color: #0a58ca; }
+    .method-put { background-color: #ffc107; color: var(--text-dark); }
+    .method-delete { background-color: #dc3545; min-width: 90px; }
+    .method-patch { background-color: #6f42c1; }
+    .method-head { background-color: #6610f2; }
+    .method-options { background-color: #6c757d; }
 
-{% block content %}
-<!-- NAVBAR déjà incluse dans base.html -->
+    footer {
+      margin-top: 3rem;
+      font-size: 1rem;
+      color: var(--text-muted);
+      text-align: center;
+      padding-bottom: 2rem;
+    }
+    footer a {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    footer a:hover {
+      color: #084fc1;
+      text-decoration: underline;
+    }
 
-<div class="actions-container text-center">
-  <a href="{% url 'scraping_data:generate_test' %}" class="btn-tester btn-tester-primary">
-    <i class="fas fa-gear"></i> Générer test
-  </a>
-  <a href="{% url 'scraping_data:tester-tous' %}" class="btn-tester btn-tester-primary">
-    <i class="fas fa-vials"></i> Tester tous les endpoints
-  </a>
-  <form method="post" action="{% url 'scraping_data:clean_tests' %}" class="d-inline-block ms-2" id="clean-tests-form">
-    {% csrf_token %}
-    <input type="hidden" name="project_id" value="{{ current_project.id }}">
-    <button type="submit" class="btn-tester btn-tester-danger">
-      <i class="fas fa-trash-alt"></i> Clean tests
+    @media (max-width: 576px) {
+      .navbar {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+      }
+      .brand-container {
+        justify-content: center;
+      }
+      .btn-tester {
+        width: 100%;
+        justify-content: center;
+        font-size: 0.9rem;
+        padding: 0.6rem 1rem;
+      }
+      tbody td, thead th {
+        font-size: 0.85rem;
+        padding: 0.75rem 1rem;
+      }
+      tbody td:nth-child(2) {
+        max-width: 100%;
+        overflow-x: auto;
+      }
+      .method-badge {
+        min-width: 70px;
+        font-size: 0.8rem;
+        padding: 0.4rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg shadow-sm">
+  <div class="container">
+    <div class="brand-container d-flex align-items-center gap-3 flex-wrap">
+      <a class="navbar-brand d-flex align-items-center fw-bold" href="#">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="var(--text-dark)" stroke-width="2" class="me-2" viewBox="0 0 16 16" stroke-linejoin="round" stroke-linecap="round">
+          <path d="M8 0L3 16h10L8 0z"/>
+        </svg>
+        MyProject
+      </a>
+      <a href="{% url 'scraping_data:list-projects' %}" class="nav-link">Projects</a>
+    </div>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
     </button>
-  </form>
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item mx-2">
+          <a class="btn btn-outline-primary btn-sm px-4 rounded-pill fw-semibold" href="#">Get Started</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- CONTENU -->
+<div class="container py-5">
+
+  <!-- Boutons principaux -->
+  <div class="actions-container text-center">
+    <a href="{% url 'scraping_data:generate_test' %}" class="btn-tester btn-tester-primary" role="button">
+      <i class="fas fa-gear"></i> Générer test
+    </a>
+    <a href="{% url 'scraping_data:tester-tous' %}" class="btn-tester btn-tester-primary" role="button">
+      <i class="fas fa-vials"></i> Tester tous les endpoints
+    </a>
+    <form method="post" action="{% url 'scraping_data:clean_tests' %}" class="d-inline-block ms-2" id="clean-tests-form">
+      {% csrf_token %}
+      <input type="hidden" name="project_id" value="{{ current_project.id }}">
+      <button type="submit" class="btn-tester btn-tester-danger">
+        <i class="fas fa-trash-alt"></i> Clean tests
+      </button>
+    </form>
+  </div>
+
+  <div id="status" class="mt-4"></div>
+
+  <hr class="my-4 border-primary" />
+
+  <div id="rapport-container" class="table-responsive" aria-describedby="rapport-description">
+    {% if swagger_data %}
+    <table class="table table-hover align-middle">
+      <caption id="rapport-description" class="visually-hidden">
+        Liste des endpoints Swagger extraits.
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col" style="width: 15%;">Méthode</th>
+          <th scope="col" style="width: 65%;">Endpoint complet</th>
+          <th scope="col" style="width: 20%;" class="text-center">Tester</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ep in swagger_data %}
+        <tr>
+          <td>
+            <span class="method-badge method-{{ ep.method|lower }}">{{ ep.method }}</span>
+          </td>
+          <td><code>{{ ep.url_complete }}</code></td>
+          <td class="text-center">
+            <a href="{% url 'scraping_data:tester-page' %}" class="btn-tester btn-tester-primary" aria-label="Tester l'endpoint {{ ep.url_complete }}">
+              <i class="fas fa-vial"></i> Tester
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-center fs-5 text-muted mt-5">
+      Aucun rapport Swagger disponible. Lancez le scraping via la page "Générer test".
+    </p>
+    {% endif %}
+  </div>
 </div>
 
-<div id="status" class="mt-4"></div>
+<footer>
+  &copy; {{ current_year|default:"2025" }} MyProject — Tous droits réservés.
+</footer>
 
-<hr class="my-4 border-primary" />
-
-<div id="rapport-container" class="table-responsive" aria-describedby="rapport-description">
-  {% if swagger_data %}
-  <table class="table table-hover align-middle">
-    <caption id="rapport-description" class="visually-hidden">
-      Liste des endpoints Swagger extraits.
-    </caption>
-    <thead>
-      <tr>
-        <th scope="col" style="width: 15%;">Méthode</th>
-        <th scope="col" style="width: 65%;">Endpoint complet</th>
-        <th scope="col" style="width: 20%;" class="text-center">Tester</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for ep in swagger_data %}
-      <tr>
-        <td>
-          <span class="method-badge method-{{ ep.method|lower }}">{{ ep.method }}</span>
-        </td>
-        <td><code>{{ ep.url_complete }}</code></td>
-        <td class="text-center">
-          <a href="{% url 'scraping_data:tester-page' %}" class="btn-tester btn-tester-primary" aria-label="Tester l'endpoint {{ ep.url_complete }}">
-            <i class="fas fa-vial"></i> Tester
-          </a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <p class="text-center fs-5 text-muted mt-5">
-    Aucun rapport Swagger disponible. Lancez le scraping via la page "Générer test".
-  </p>
-  {% endif %}
-</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -268,4 +378,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 </script>
-{% endblock %}
+
+</body>
+</html>
